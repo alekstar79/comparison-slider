@@ -36,7 +36,7 @@ export class ComparisonSlider
     this.filterEngine = new FilterEngine(originalCanvas, filteredCanvas, this.originalImage)
     this.filterEngine.applyFilter(initialFilter)
 
-    this.dragController = new DragController(covered, direction)
+    this.dragController = new DragController(this.container, direction)
     this.resetPosition()
 
     new UiController(filterButtons, this.filterEngine)

@@ -68,10 +68,6 @@ export class FilterEngine {
     }
 
     draw(this.originalCanvas)
-
-    const currentFilter = this.filteredCanvas.style.filter
-    this.filteredCanvas.style.filter = 'none'
     draw(this.filteredCanvas)
-    this.filteredCanvas.style.filter = currentFilter
   }
 }

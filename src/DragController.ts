@@ -1,9 +1,10 @@
 export class DragController {
   private readonly container: HTMLElement
-  private readonly handle: HTMLElement
+  private readonly covered: HTMLElement
+  private readonly handleGrip: HTMLElement
+  private readonly handleLine: HTMLElement
   private readonly direction: 'horizontal' | 'vertical'
   private readonly filteredCanvas: HTMLCanvasElement
-  private readonly border: HTMLElement
 
   private isDragging = false
   private animationFrameId: number | null = null
@@ -13,26 +14,32 @@ export class DragController {
 
   constructor(container: HTMLElement, direction: 'horizontal' | 'vertical') {
     this.container = container
-    this.filteredCanvas = container.querySelector('.filtered-canvas')!
-    this.handle = container.querySelector('.handle')!
-    this.border = container.querySelector('.dashed-border')!
+    this.covered = container.querySelector('.covered')!
+    this.filteredCanvas = this.covered.querySelector('.filtered-canvas')!
+    this.handleGrip = container.querySelector('.handle-grip')!
+    this.handleLine = this.covered.querySelector('.handle-line')!
     this.direction = direction
 
     this.container.classList.add(this.direction)
-    this.handle.classList.add(this.direction)
+    this.handleGrip.classList.add(this.direction)
+    this.handleLine.classList.add(this.direction)
 
     this.bindEvents()
   }
 
   setPosition(x: number, y: number) {
-    const { clientWidth, clientHeight } = this.container
+    const { clientWidth, clientHeight } = this.covered
     this.posX = Math.max(0, Math.min(clientWidth, x))
     this.posY = Math.max(0, Math.min(clientHeight, y))
+
+    // Update grip immediately for responsiveness
+    this.handleGrip.style.transform = `translate(${this.posX}px, ${this.posY}px)`
+
     this.scheduleUpdate()
   }
 
   private getClientPos(e: MouseEvent | TouchEvent) {
-    const rect = this.container.getBoundingClientRect()
+    const rect = this.covered.getBoundingClientRect()
     const touch = 'touches' in e ? e.touches[0] : e
     return {
       x: touch.clientX - rect.left,
@@ -44,7 +51,7 @@ export class DragController {
     const onStart = (e: MouseEvent | TouchEvent) => {
       e.preventDefault()
       this.isDragging = true
-      this.handle.classList.add('draggable')
+      this.handleGrip.classList.add('draggable')
     }
 
     const onMove = (e: MouseEvent | TouchEvent) => {
@@ -56,20 +63,22 @@ export class DragController {
 
     const onEnd = () => {
       this.isDragging = false
-      this.handle.classList.remove('draggable')
+      this.handleGrip.classList.remove('draggable')
     }
 
-    this.handle.addEventListener('mousedown', onStart)
+    // We only drag the grip, not the line
+    this.handleGrip.addEventListener('mousedown', onStart)
     document.addEventListener('mousemove', onMove)
     document.addEventListener('mouseup', onEnd)
-    this.handle.addEventListener('touchstart', onStart, { passive: false })
+    this.handleGrip.addEventListener('touchstart', onStart, { passive: false })
     document.addEventListener('touchmove', onMove, { passive: false })
     document.addEventListener('touchend', onEnd)
   }
 
   private scheduleUpdate() {
     if (this.animationFrameId) {
-      cancelAnimationFrame(this.animationFrameId)
+      // No need to cancel, just let the last scheduled update run
+      return
     }
     this.animationFrameId = requestAnimationFrame(() => this.updateClip())
   }
@@ -79,12 +88,10 @@ export class DragController {
 
     if (this.direction === 'horizontal') {
       this.filteredCanvas.style.clipPath = `inset(0 calc(100% - ${this.posX}px) 0 0)`
-      this.border.style.width = `${this.posX}px`
-      this.handle.style.transform = `translate(${this.posX}px, ${this.posY}px)`
+      this.handleLine.style.transform = `translateX(${this.posX}px)`
     } else {
       this.filteredCanvas.style.clipPath = `inset(0 0 calc(100% - ${this.posY}px) 0)`
-      this.border.style.height = `${this.posY}px`
-      this.handle.style.transform = `translate(${this.posX}px, ${this.posY}px)`
+      this.handleLine.style.transform = `translateY(${this.posY}px)`
     }
   }
 }

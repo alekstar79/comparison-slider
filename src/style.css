@@ -14,7 +14,7 @@ body {
   flex-direction: column;
   align-items: center;
 
-  font-family: Arial, serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   color: #fff;
 
   overflow-x: hidden;
@@ -50,11 +50,12 @@ h2 {
   position: relative;
   width: 100%;
   height: 100%;
-  border: 16px solid #FFF;
-  box-shadow: 0 0 40px 5px rgba(0,0,0,.4);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.4);
   display: block;
   line-height: 0;
-  overflow: visible;
+  overflow: hidden; /* Hide overflowing parts of the canvas */
 }
 
 .slider-large {
@@ -78,6 +79,7 @@ h2 {
   width: 100%;
   height: 100%;
   display: block;
+  border-radius: 14px; /* Match parent's border-radius */
 }
 
 .original-canvas {
@@ -91,67 +93,58 @@ h2 {
   display: none !important;
 }
 
-.handle {
-  position: absolute;
-  width: 46px;
-  height: 46px;
-  margin-left: -23px;
-  margin-top: -23px;
-  border-radius: 50%;
-  background-color: #fff;
-  text-align: center;
-  cursor: grab;
-  user-select: none;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-  z-index: 1000;
-}
-
-.handle span {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  color: #000;
-  font-size: 14px;
-  font-weight: bold;
-  white-space: nowrap;
-  margin: 0 !important;
-}
-.horizontal .handle span {
-  transform: translate(-50%, -50%) rotate(0deg);
-}
-.vertical .handle span {
-  transform: translate(-50%, -50%) rotate(90deg);
-}
-.handle:hover {
-  background-color: #555;
-}
-.handle:hover span {
-  color: #FFF !important;
-}
-.handle.draggable {
-  background-color: #555;
-}
-.handle.draggable span {
-  color: #FFF !important;
-}
-
-.dashed-border {
+.handle-line {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 3;
-  box-sizing: border-box;
+  background-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 15px rgba(0,0,0,0.6);
+  z-index: 5;
+  pointer-events: none; /* The line is not interactive */
 }
 
-.horizontal .dashed-border {
-  border-right: 1px dashed #FFF;
+.handle-grip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 44px;
+  height: 44px;
+  margin-left: -22px;
+  margin-top: -22px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  z-index: 10;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Removed: transition: transform 0.1s; */
 }
-.vertical .dashed-border {
-  border-bottom: 1px dashed #FFF;
+
+.handle-grip:after {
+  content: '↔';
+  color: black;
+  font-size: 20px;
+}
+
+.handle-grip.draggable {
+  cursor: grabbing;
+  transform: scale(1.1);
+}
+
+.horizontal .handle-line {
+  width: 4px;
+  height: 100%;
+  margin-left: -2px;
+}
+.vertical .handle-line {
+  width: 100%;
+  height: 4px;
+  margin-top: -2px;
+}
+
+.vertical .handle-grip:after {
+  content: '↕';
 }
 
 .filter-buttons {
@@ -167,29 +160,29 @@ h2 {
   width: 90%;
 }
 .filter-buttons button {
-  padding: 10px 16px;
-  border: 2px solid #fff;
-  background: rgba(0,0,0,0.8);
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(20, 20, 40, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   color: #fff;
   cursor: pointer;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
-  transition: all 0.3s ease;
-  min-width: 85px;
-  text-transform: uppercase;
+  text-shadow: 0 0 5px rgba(0,0,0,0.5);
+  transition: all 0.2s ease;
 }
 .filter-buttons button:hover {
-  background: #fff !important;
-  color: #000 !important;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(255,255,255,0.5);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 1);
+  transform: translateY(-2px);
 }
 .filter-buttons button.active {
-  background: #fff !important;
-  color: #000 !important;
-  box-shadow: 0 0 25px #fff;
-  border-color: #000;
+  background: rgba(255, 255, 255, 0.9);
+  color: #000;
+  border-color: rgba(255, 255, 255, 0.9);
+  text-shadow: none;
   transform: scale(1.05);
 }
 

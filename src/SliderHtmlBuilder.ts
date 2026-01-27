@@ -30,10 +30,7 @@ export class SliderHtmlBuilder
   static enhanceImage(img: HTMLImageElement): HTMLElement
   {
     const container = document.createElement('div')
-    // Transfer classes from the original image to the new container
     container.className = `slider-container ${img.className}`
-    
-    // Set aspect ratio for responsive scaling in media queries
     container.style.aspectRatio = `${img.naturalWidth} / ${img.naturalHeight}`
 
     const direction = (img.dataset.direction as 'horizontal' | 'vertical') || 'horizontal'
@@ -59,13 +56,11 @@ export class SliderHtmlBuilder
       <canvas class="original-canvas"></canvas>
       <canvas class="filtered-canvas"></canvas>
       
-      <div class="handle">
-        <span>◄►</span>
-      </div>
+      <div class="handle-line"></div>
       
-      <div class="dashed-border"></div>
       <div class="filter-buttons">${filtersHtml}</div>
-    </div>`
+    </div>
+    <div class="handle-grip"></div>` // Moved handle-grip outside .covered
 
     const parent = img.parentNode!
     parent.insertBefore(container, img)
