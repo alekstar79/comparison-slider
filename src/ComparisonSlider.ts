@@ -3,13 +3,18 @@ import { DragController } from './DragController'
 import { FilterEngine } from './FilterEngine'
 import { UiController } from './UIController'
 
+export interface Plugin {
+  initialize(): void;
+}
+
 export class ComparisonSlider
 {
-  private readonly originalImage: HTMLImageElement
-  private readonly container: HTMLElement
+  public readonly originalImage: HTMLImageElement
+  public readonly container: HTMLElement
+  public filterEngine!: FilterEngine
+  private readonly plugins: Plugin[] = []
 
   private dragController!: DragController
-  private filterEngine!: FilterEngine
   private resizeObserver!: ResizeObserver
 
   constructor(img: HTMLImageElement)
@@ -17,6 +22,10 @@ export class ComparisonSlider
     this.originalImage = img
     this.container = SliderHtmlBuilder.enhanceImage(img)
     this.init().catch(console.error)
+  }
+
+  public addPlugin(plugin: Plugin) {
+    this.plugins.push(plugin)
   }
 
   private async init()
@@ -28,11 +37,11 @@ export class ComparisonSlider
     const filteredCanvas = covered.querySelector('.filtered-canvas')! as HTMLCanvasElement
     const handleLine = covered.querySelector('.handle-line')! as HTMLElement
     const handleGrip = this.container.querySelector('.handle-grip')! as HTMLElement
-    
+
     const direction = covered.dataset.direction as 'horizontal' | 'vertical'
 
     this.filterEngine = new FilterEngine(originalCanvas, filteredCanvas, this.originalImage)
-    
+
     new UiController(covered, this.filterEngine)
 
     const firstActiveButton = covered.querySelector('.filter-buttons button.active') as HTMLButtonElement | null
@@ -42,6 +51,8 @@ export class ComparisonSlider
 
     this.dragController = new DragController(covered, handleGrip, handleLine, filteredCanvas, direction)
     this.resetPosition()
+
+    this.plugins.forEach(plugin => plugin.initialize())
 
     this.setupResizeObserver()
   }
@@ -67,10 +78,10 @@ export class ComparisonSlider
     const covered = this.container.querySelector('.covered')! as HTMLElement
     const initX = parseInt(covered.dataset.initX || '0', 10)
     const initY = parseInt(covered.dataset.initY || '0', 10)
-    
+
     const newX = (initX / this.originalImage.naturalWidth) * covered.clientWidth
     const newY = (initY / this.originalImage.naturalHeight) * covered.clientHeight
-    
+
     this.dragController.setPosition(newX, newY)
   }
 }

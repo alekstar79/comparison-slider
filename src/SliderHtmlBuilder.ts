@@ -31,7 +31,7 @@ export class SliderHtmlBuilder
     { name: 'Duotone', value: 'contrast(1.5) hue-rotate(-35deg) saturate(2)' },
     { name: 'Neon', value: 'brightness(1.5) contrast(1.5) saturate(1.5) hue-rotate(290deg)' },
     { name: 'Matrix', value: 'contrast(1.2) saturate(0.8) hue-rotate(90deg) brightness(0.8)' },
-    
+
     // New Creative Filters
     { name: 'Noir', value: 'grayscale(1) contrast(1.3) brightness(0.9)' },
     { name: 'Lomo', value: 'contrast(1.4) saturate(1.1) brightness(0.9) sepia(0.2)' },

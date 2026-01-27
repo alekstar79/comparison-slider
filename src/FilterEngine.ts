@@ -1,7 +1,7 @@
 export class FilterEngine {
-  private readonly originalImage: HTMLImageElement
-  private readonly originalCanvas: HTMLCanvasElement
-  private readonly filteredCanvas: HTMLCanvasElement
+  public readonly originalImage: HTMLImageElement
+  public readonly originalCanvas: HTMLCanvasElement
+  public readonly filteredCanvas: HTMLCanvasElement
 
   constructor(
     originalCanvas: HTMLCanvasElement,
@@ -43,8 +43,7 @@ export class FilterEngine {
     const containerRatio = containerWidth / containerHeight
 
     let sWidth, sHeight, sx, sy
-    
-    // This logic mimics object-fit: cover
+
     if (imgRatio > containerRatio) {
       sHeight = naturalHeight
       sWidth = sHeight * containerRatio
@@ -62,8 +61,8 @@ export class FilterEngine {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       ctx.drawImage(
         this.originalImage,
-        sx, sy, sWidth, sHeight, // Source rectangle (part of the image to draw)
-        0, 0, canvas.width, canvas.height // Destination rectangle (the full canvas)
+        sx, sy, sWidth, sHeight,
+        0, 0, canvas.width, canvas.height
       )
     }
 
