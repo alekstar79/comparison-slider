@@ -1,12 +1,7 @@
-export class FilterEngine
-{
+export class FilterEngine {
   private readonly originalImage: HTMLImageElement
-
-  private originalCanvas: HTMLCanvasElement
-  private filteredCanvas: HTMLCanvasElement
-
-  private originalCtx: CanvasRenderingContext2D
-  private filteredCtx: CanvasRenderingContext2D
+  private readonly originalCanvas: HTMLCanvasElement
+  private readonly filteredCanvas: HTMLCanvasElement
 
   constructor(
     originalCanvas: HTMLCanvasElement,
@@ -15,70 +10,68 @@ export class FilterEngine
   ) {
     this.originalCanvas = originalCanvas
     this.filteredCanvas = filteredCanvas
-
-    this.originalCtx = originalCanvas.getContext('2d')!
-    this.filteredCtx = filteredCanvas.getContext('2d')!
-
     this.originalImage = originalImage
+
+    this.redraw()
   }
 
-  applyFilter(filter: string)
-  {
-    const covered = this.originalCanvas.parentElement! as HTMLElement
+  applyFilter(filter: string) {
+    this.filteredCanvas.style.filter = filter
+  }
+
+  redraw() {
     const dpr = window.devicePixelRatio || 1
+    const container = this.originalCanvas.parentElement!
+    const { clientWidth: containerWidth, clientHeight: containerHeight } = container
 
-    const containerWidth = covered.clientWidth
-    const containerHeight = covered.clientHeight
-    const pixelWidth = Math.floor(containerWidth * dpr)
-    const pixelHeight = Math.floor(containerHeight * dpr)
-
-    this.originalCanvas.width = pixelWidth
-    this.originalCanvas.height = pixelHeight
-    this.filteredCanvas.width = pixelWidth
-    this.filteredCanvas.height = pixelHeight
-
-    this.originalCanvas.style.width = '100%'
-    this.originalCanvas.style.height = '100%'
-    this.filteredCanvas.style.width = '100%'
-    this.filteredCanvas.style.height = '100%'
-
-    const imgRatio = this.originalImage.naturalWidth / this.originalImage.naturalHeight
-    const containerRatio = containerWidth / containerHeight
-
-    let drawWidth: number, drawHeight: number, offsetX: number, offsetY: number
-
-    if (imgRatio > containerRatio) {
-      drawHeight = containerHeight
-      drawWidth = containerHeight * imgRatio
-      offsetX = (containerWidth - drawWidth) / 2
-      offsetY = 0
-    } else {
-      drawWidth = containerWidth
-      drawHeight = containerWidth / imgRatio
-      offsetX = 0
-      offsetY = (containerHeight - drawHeight) / 2
+    if (containerWidth === 0 || containerHeight === 0) {
+      return
     }
 
-    this.originalCtx.save()
-    this.originalCtx.scale(dpr, dpr)
-    this.originalCtx.clearRect(0, 0, containerWidth, containerHeight)
-    this.originalCtx.drawImage(
-      this.originalImage,
-      offsetX, offsetY, drawWidth, drawHeight
-    )
+    const setCanvasSize = (canvas: HTMLCanvasElement) => {
+      canvas.width = Math.floor(containerWidth * dpr)
+      canvas.height = Math.floor(containerHeight * dpr)
+      canvas.style.width = `${containerWidth}px`
+      canvas.style.height = `${containerHeight}px`
+    }
 
-    this.originalCtx.restore()
+    setCanvasSize(this.originalCanvas)
+    setCanvasSize(this.filteredCanvas)
 
-    this.filteredCtx.save()
-    this.filteredCtx.scale(dpr, dpr)
-    this.filteredCtx.clearRect(0, 0, containerWidth, containerHeight)
-    this.filteredCtx.filter = filter
-    this.filteredCtx.drawImage(
-      this.originalImage,
-      offsetX, offsetY, drawWidth, drawHeight
-    )
+    const { naturalWidth, naturalHeight } = this.originalImage
+    const imgRatio = naturalWidth / naturalHeight
+    const containerRatio = containerWidth / containerHeight
 
-    this.filteredCtx.restore()
-    this.filteredCtx.filter = 'none'
+    let sWidth, sHeight, sx, sy
+    
+    // This logic mimics object-fit: cover
+    if (imgRatio > containerRatio) {
+      sHeight = naturalHeight
+      sWidth = sHeight * containerRatio
+      sx = (naturalWidth - sWidth) / 2
+      sy = 0
+    } else {
+      sWidth = naturalWidth
+      sHeight = sWidth / containerRatio
+      sx = 0
+      sy = (naturalHeight - sHeight) / 2
+    }
+
+    const draw = (canvas: HTMLCanvasElement) => {
+      const ctx = canvas.getContext('2d')!
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.drawImage(
+        this.originalImage,
+        sx, sy, sWidth, sHeight, // Source rectangle (part of the image to draw)
+        0, 0, canvas.width, canvas.height // Destination rectangle (the full canvas)
+      )
+    }
+
+    draw(this.originalCanvas)
+
+    const currentFilter = this.filteredCanvas.style.filter
+    this.filteredCanvas.style.filter = 'none'
+    draw(this.filteredCanvas)
+    this.filteredCanvas.style.filter = currentFilter
   }
 }

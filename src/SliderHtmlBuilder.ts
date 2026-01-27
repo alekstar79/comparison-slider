@@ -30,18 +30,19 @@ export class SliderHtmlBuilder
   static enhanceImage(img: HTMLImageElement): HTMLElement
   {
     const container = document.createElement('div')
+    // Transfer classes from the original image to the new container
+    container.className = `slider-container ${img.className}`
+    
+    // Set aspect ratio for responsive scaling in media queries
+    container.style.aspectRatio = `${img.naturalWidth} / ${img.naturalHeight}`
 
-    container.className = 'slider-container'
-
-    const originalClasses = img.className
     const direction = (img.dataset.direction as 'horizontal' | 'vertical') || 'horizontal'
-    const initX = parseInt(img.dataset.initX || '25')
-    const initY = parseInt(img.dataset.initY || '25')
+    const initX = img.dataset.initX || '25'
+    const initY = img.dataset.initY || '25'
 
     const filterNames = img.dataset.filters?.split(',') || ['Grayscale', 'Blur', 'Invert', 'Bright']
 
     let filtersHtml = ''
-
     SliderHtmlBuilder.ALL_FILTERS.forEach(filterDef => {
       if (filterNames.some(name => name.trim() === filterDef.name)) {
         filtersHtml += `<button data-filter="${filterDef.value}">${filterDef.name}</button>`
@@ -49,11 +50,11 @@ export class SliderHtmlBuilder
     })
 
     container.innerHTML = `<div 
-      class="covered ${originalClasses}" 
+      class="covered" 
       data-direction="${direction}" 
       data-init-x="${initX}" 
       data-init-y="${initY}"
-      style="width: ${img.offsetWidth || 800}px; height: ${img.offsetHeight || 470}px; ${img.style.cssText}"
+      style="${img.style.cssText}"
     >
       <canvas class="original-canvas"></canvas>
       <canvas class="filtered-canvas"></canvas>
@@ -67,7 +68,6 @@ export class SliderHtmlBuilder
     </div>`
 
     const parent = img.parentNode!
-
     parent.insertBefore(container, img)
     parent.removeChild(img)
 

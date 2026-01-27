@@ -42,17 +42,17 @@ h2 {
 
 .slider-container {
   margin: 30px auto;
-  max-width: 900px;
   position: relative;
   overflow: visible;
 }
 
 .covered {
   position: relative;
+  width: 100%;
+  height: 100%;
   border: 16px solid #FFF;
-  margin: 20px auto;
   box-shadow: 0 0 40px 5px rgba(0,0,0,.4);
-  display: inline-block;
+  display: block;
   line-height: 0;
   overflow: visible;
 }
@@ -155,15 +155,16 @@ h2 {
 }
 
 .filter-buttons {
-  position: relative;
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 10;
-  text-align: center;
-  padding: 20px 0;
-  gap: 10px;
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  max-width: 850px;
+  gap: 10px;
+  width: 90%;
 }
 .filter-buttons button {
   padding: 10px 16px;
@@ -199,17 +200,12 @@ h2 {
   h1 {
     font-size: 40px;
   }
-  .slider-large {
+  .slider-large, .slider-small, .slider-tiny {
     width: 90vw;
-    height: calc(90vw * 470/800);
+    height: auto; /* Let aspect-ratio handle the height */
   }
-  .slider-small {
-    width: 90vw;
-    height: calc(90vw * 300/400);
-  }
-  .slider-tiny {
-    width: 70vw;
-    height: calc(70vw * 2/3);
+  .filter-buttons {
+    bottom: 10px;
   }
   .filter-buttons button {
     min-width: 70px;

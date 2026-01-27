@@ -6,10 +6,11 @@ import { UiController } from './UIController'
 export class ComparisonSlider
 {
   private readonly originalImage: HTMLImageElement
+  private readonly container: HTMLElement
 
-  private container: HTMLElement
   private dragController!: DragController
   private filterEngine!: FilterEngine
+  private resizeObserver!: ResizeObserver
 
   constructor(img: HTMLImageElement)
   {
@@ -20,7 +21,7 @@ export class ComparisonSlider
 
   private async init()
   {
-    await this.waitForImageLoad()
+    await this.ensureImageLoaded()
 
     const covered = this.container.querySelector('.covered')! as HTMLElement
     const originalCanvas = this.container.querySelector('.original-canvas') as HTMLCanvasElement
@@ -28,11 +29,6 @@ export class ComparisonSlider
     const filterButtons = [...this.container.querySelectorAll('.filter-buttons button')] as HTMLButtonElement[]
 
     const direction = covered.dataset.direction as 'horizontal' | 'vertical'
-    const initX = parseInt(covered.dataset.initX || '25')
-    const initY = parseInt(covered.dataset.initY || '25')
-
-    originalCanvas.style.display = 'block'
-    filteredCanvas.style.display = 'block'
 
     const firstFilterBtn = filterButtons[0] as HTMLElement
     const initialFilter = firstFilterBtn.dataset.filter || 'grayscale(100%)'
@@ -41,29 +37,39 @@ export class ComparisonSlider
     this.filterEngine.applyFilter(initialFilter)
 
     this.dragController = new DragController(covered, direction)
-    this.dragController.setPosition(initX, initY)
+    this.resetPosition()
 
     new UiController(filterButtons, this.filterEngine)
+
+    this.setupResizeObserver()
   }
 
-  private waitForImageLoad(): Promise<void> {
-    return new Promise((resolve) => {
-      const resolveLoad = this.loadedResolver(resolve)
-
-      resolveLoad()
-      if (!this.originalImage.complete || this.originalImage.naturalWidth === 0) {
-        this.originalImage.addEventListener('load', resolveLoad, { once: true })
-      }
+  private ensureImageLoaded(): Promise<void> {
+    if (this.originalImage.complete && this.originalImage.naturalWidth > 0) {
+      return Promise.resolve()
+    }
+    return new Promise(resolve => {
+      this.originalImage.addEventListener('load', () => resolve(), { once: true })
     })
   }
 
-  private loadedResolver(callback: () => void) {
-    return () => {
-      const { complete, naturalWidth } = this.originalImage
+  private setupResizeObserver() {
+    this.resizeObserver = new ResizeObserver(() => {
+      this.filterEngine.redraw()
+      this.resetPosition()
+    })
+    this.resizeObserver.observe(this.container)
+  }
 
-      if (complete && naturalWidth > 0) {
-        callback()
-      }
-    }
+  private resetPosition() {
+    const covered = this.container.querySelector('.covered')! as HTMLElement
+    const initX = parseInt(covered.dataset.initX || '0', 10)
+    const initY = parseInt(covered.dataset.initY || '0', 10)
+    
+    // Calculate position based on the current size of the container
+    const newX = (initX / this.originalImage.naturalWidth) * covered.clientWidth
+    const newY = (initY / this.originalImage.naturalHeight) * covered.clientHeight
+    
+    this.dragController.setPosition(newX, newY)
   }
 }
