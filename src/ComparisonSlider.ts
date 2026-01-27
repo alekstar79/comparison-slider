@@ -24,22 +24,24 @@ export class ComparisonSlider
     await this.ensureImageLoaded()
 
     const covered = this.container.querySelector('.covered')! as HTMLElement
-    const originalCanvas = this.container.querySelector('.original-canvas') as HTMLCanvasElement
-    const filteredCanvas = this.container.querySelector('.filtered-canvas') as HTMLCanvasElement
-    const filterButtons = [...this.container.querySelectorAll('.filter-buttons button')] as HTMLButtonElement[]
-
+    const originalCanvas = covered.querySelector('.original-canvas')! as HTMLCanvasElement
+    const filteredCanvas = covered.querySelector('.filtered-canvas')! as HTMLCanvasElement
+    const handleLine = covered.querySelector('.handle-line')! as HTMLElement
+    const handleGrip = this.container.querySelector('.handle-grip')! as HTMLElement
+    
     const direction = covered.dataset.direction as 'horizontal' | 'vertical'
 
-    const firstFilterBtn = filterButtons[0] as HTMLElement
-    const initialFilter = firstFilterBtn.dataset.filter || 'grayscale(100%)'
-
     this.filterEngine = new FilterEngine(originalCanvas, filteredCanvas, this.originalImage)
-    this.filterEngine.applyFilter(initialFilter)
+    
+    new UiController(covered, this.filterEngine)
 
-    this.dragController = new DragController(this.container, direction)
+    const firstActiveButton = covered.querySelector('.filter-buttons button.active') as HTMLButtonElement | null
+    if (firstActiveButton) {
+      this.filterEngine.applyFilter(firstActiveButton.dataset.filter!)
+    }
+
+    this.dragController = new DragController(covered, handleGrip, handleLine, filteredCanvas, direction)
     this.resetPosition()
-
-    new UiController(filterButtons, this.filterEngine)
 
     this.setupResizeObserver()
   }
@@ -66,7 +68,6 @@ export class ComparisonSlider
     const initX = parseInt(covered.dataset.initX || '0', 10)
     const initY = parseInt(covered.dataset.initY || '0', 10)
     
-    // Calculate position based on the current size of the container
     const newX = (initX / this.originalImage.naturalWidth) * covered.clientWidth
     const newY = (initY / this.originalImage.naturalHeight) * covered.clientHeight
     

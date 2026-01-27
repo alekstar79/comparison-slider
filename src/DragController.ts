@@ -1,10 +1,9 @@
 export class DragController {
-  private readonly container: HTMLElement
-  private readonly covered: HTMLElement
+  private readonly boundary: HTMLElement
   private readonly handleGrip: HTMLElement
   private readonly handleLine: HTMLElement
-  private readonly direction: 'horizontal' | 'vertical'
   private readonly filteredCanvas: HTMLCanvasElement
+  private readonly direction: 'horizontal' | 'vertical'
 
   private isDragging = false
   private animationFrameId: number | null = null
@@ -12,34 +11,37 @@ export class DragController {
   private posX = 200
   private posY = 100
 
-  constructor(container: HTMLElement, direction: 'horizontal' | 'vertical') {
-    this.container = container
-    this.covered = container.querySelector('.covered')!
-    this.filteredCanvas = this.covered.querySelector('.filtered-canvas')!
-    this.handleGrip = container.querySelector('.handle-grip')!
-    this.handleLine = this.covered.querySelector('.handle-line')!
+  constructor(
+    boundary: HTMLElement,
+    handleGrip: HTMLElement,
+    handleLine: HTMLElement,
+    filteredCanvas: HTMLCanvasElement,
+    direction: 'horizontal' | 'vertical'
+  ) {
+    this.boundary = boundary
+    this.handleGrip = handleGrip
+    this.handleLine = handleLine
+    this.filteredCanvas = filteredCanvas
     this.direction = direction
 
-    this.container.classList.add(this.direction)
-    this.handleGrip.classList.add(this.direction)
-    this.handleLine.classList.add(this.direction)
+    // Add direction classes to make the line and grip visible and oriented correctly
+    this.handleLine.classList.add(direction)
+    this.handleGrip.classList.add(direction)
 
     this.bindEvents()
   }
 
   setPosition(x: number, y: number) {
-    const { clientWidth, clientHeight } = this.covered
+    const { clientWidth, clientHeight } = this.boundary
     this.posX = Math.max(0, Math.min(clientWidth, x))
     this.posY = Math.max(0, Math.min(clientHeight, y))
 
-    // Update grip immediately for responsiveness
     this.handleGrip.style.transform = `translate(${this.posX}px, ${this.posY}px)`
-
     this.scheduleUpdate()
   }
 
   private getClientPos(e: MouseEvent | TouchEvent) {
-    const rect = this.covered.getBoundingClientRect()
+    const rect = this.boundary.getBoundingClientRect()
     const touch = 'touches' in e ? e.touches[0] : e
     return {
       x: touch.clientX - rect.left,
@@ -66,7 +68,6 @@ export class DragController {
       this.handleGrip.classList.remove('draggable')
     }
 
-    // We only drag the grip, not the line
     this.handleGrip.addEventListener('mousedown', onStart)
     document.addEventListener('mousemove', onMove)
     document.addEventListener('mouseup', onEnd)
@@ -76,16 +77,12 @@ export class DragController {
   }
 
   private scheduleUpdate() {
-    if (this.animationFrameId) {
-      // No need to cancel, just let the last scheduled update run
-      return
-    }
+    if (this.animationFrameId) return
     this.animationFrameId = requestAnimationFrame(() => this.updateClip())
   }
 
   private updateClip() {
     this.animationFrameId = null
-
     if (this.direction === 'horizontal') {
       this.filteredCanvas.style.clipPath = `inset(0 calc(100% - ${this.posX}px) 0 0)`
       this.handleLine.style.transform = `translateX(${this.posX}px)`
