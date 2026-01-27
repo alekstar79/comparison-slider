@@ -24,7 +24,13 @@ export class SliderHtmlBuilder
     { name: 'Glow', value: 'brightness(130%) contrast(120%) drop-shadow(0 0 5px rgba(255,255,255,0.8))' },
     { name: 'Vintage', value: 'sepia(60%) brightness(110%) contrast(110%)' },
     { name: 'Cold', value: 'hue-rotate(-20deg) contrast(110%) brightness(95%)' },
-    { name: 'Warm', value: 'hue-rotate(20deg) saturate(120%) brightness(105%)' }
+    { name: 'Warm', value: 'hue-rotate(20deg) saturate(120%) brightness(105%)' },
+    
+    // New Creative Filters
+    { name: 'Cinematic', value: 'contrast(1.2) saturate(1.2) sepia(0.3)' },
+    { name: 'Duotone', value: 'contrast(1.5) hue-rotate(-35deg) saturate(2)' },
+    { name: 'Neon', value: 'brightness(1.5) contrast(1.5) saturate(1.5) hue-rotate(290deg)' },
+    { name: 'Matrix', value: 'contrast(1.2) saturate(0.8) hue-rotate(90deg) brightness(0.8)' }
   ]
 
   static enhanceImage(img: HTMLImageElement): HTMLElement
