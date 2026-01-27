@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Image Comparison Slider</title>
+  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="stylesheet" href="./src/style.css">
+</head>
+<body>
+  <h1>Image Comparison Slider</h1>
+  <h2>Drag the handle • Click filter buttons</h2>
+
+  <img
+    src="/images/b1.jpg"
+    data-comparison-slide
+    data-init-x="200"
+    data-init-y="250"
+    alt=""
+  >
+  <img
+    src="/images/m1.jpg"
+    data-comparison-slide
+    data-direction="vertical"
+    data-init-x="100"
+    data-init-y="300"
+    data-filters="Contrast,Sepia,Glow"
+    alt=""
+  >
+  <img
+    src="/images/l1.jpg"
+    data-comparison-slide
+    data-init-x="300"
+    data-init-y="150"
+    data-filters="Poster,Saturate,Vintage,Cold,Warm"
+    alt=""
+  >
+
+  <script type="module" src="./src/main.ts"></script>
+</body>
+</html>
