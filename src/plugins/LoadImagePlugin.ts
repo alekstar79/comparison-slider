@@ -13,6 +13,8 @@ export class LoadImagePlugin {
   }
 
   public initialize() {
+    if (this.slider.originalImage.dataset.imgset === undefined) return
+
     const uploadButtonBlock = this.config.uiBlocks.find(block => block.id === 'actionButtons')
     if (!uploadButtonBlock) return
 
@@ -31,6 +33,7 @@ export class LoadImagePlugin {
     this.fileInput.type = 'file'
     this.fileInput.accept = 'image/*'
     this.fileInput.style.display = 'none'
+    this.fileInput.multiple = true
     this.slider.container.appendChild(this.fileInput)
   }
 
@@ -39,20 +42,18 @@ export class LoadImagePlugin {
     this.fileInput.addEventListener('change', (event) => this.handleFileSelect(event))
   }
 
-  private handleFileSelect(event: Event) {
+  private async handleFileSelect(event: Event) {
     const target = event.target as HTMLInputElement
-    const file = target.files?.[0]
+    const files = target.files
 
-    if (file) {
-      const reader = new FileReader()
+    if (files && files.length > 0) {
+      const dataUrls = Array.from(files).map(file => URL.createObjectURL(file))
 
-      reader.onload = async (e) => {
-        if (e.target?.result) {
-          await this.slider.updateImage(e.target.result as string)
-        }
+      if (this.slider.imageSetPlugin) {
+        await this.slider.imageSetPlugin.addImages(dataUrls)
+      } else {
+        await this.slider.updateImage(dataUrls[0])
       }
-
-      reader.readAsDataURL(file)
     }
   }
 }

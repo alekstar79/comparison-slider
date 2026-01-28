@@ -1,6 +1,8 @@
+import { ImageSetPlugin } from '../plugins/ImageSetPlugin'
 import { SliderHtmlBuilder } from './SliderHtmlBuilder'
 import { DragController } from './DragController'
 import { FilterEngine } from './FilterEngine'
+
 import { UIConfig } from '../config'
 
 export interface Plugin {
@@ -16,31 +18,49 @@ export class ComparisonSlider {
   public filterEngine!: FilterEngine
   public dragController!: DragController
   public resizeObserver!: ResizeObserver
+  public imageSetPlugin?: ImageSetPlugin
 
   constructor(img: HTMLImageElement, config: UIConfig)
   {
     this.originalImage = img
     this.config = config
-
     this.container = SliderHtmlBuilder.enhanceImage(img, this.config)
     this.init().catch(console.error)
   }
 
   public addPlugin(plugin: Plugin) {
     this.plugins.push(plugin)
+
+    if (plugin instanceof ImageSetPlugin) {
+      this.imageSetPlugin = plugin
+    }
   }
 
-  public async updateImage(newSrc: string) {
-    this.originalImage.src = newSrc
+  public async updateImage(newImage: HTMLImageElement | string, reset = true) {
+    if (typeof newImage === 'string') {
+      this.originalImage.src = newImage
+      await this.ensureImageLoaded()
+    } else {
+      this.originalImage = newImage
+    }
 
-    await this.ensureImageLoaded()
-
-    this.filterEngine.redraw()
-    this.resetPosition()
+    this.filterEngine.updateImage(this.originalImage)
+    if (reset) {
+      this.resetPosition()
+    }
   }
 
   private async init()
   {
+    const imgSetAttr = this.originalImage.dataset.imgset
+
+    if (imgSetAttr) {
+      const images = imgSetAttr.split(',').map(s => s.trim())
+      if (images.length > 0) {
+        this.originalImage.src = images[0]
+      }
+    }
+
     await this.ensureImageLoaded()
 
     const covered = this.container.querySelector('.covered')! as HTMLElement

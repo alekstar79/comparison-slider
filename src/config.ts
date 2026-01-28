@@ -1,7 +1,9 @@
+import { ImageSetPlugin } from './plugins/ImageSetPlugin'
 import { FilterPlugin } from './plugins/FilterPlugin'
 import { FullscreenPlugin } from './plugins/FullscreenPlugin'
 import { LoadImagePlugin } from './plugins/LoadImagePlugin'
 import { SavePlugin } from './plugins/SavePlugin'
+
 import { Plugin } from './core/ComparisonSlider'
 
 export interface ButtonPosition {
@@ -29,6 +31,12 @@ export interface UIBlock {
 export interface UIConfig {
   plugins: { new (slider: any, config: UIConfig): Plugin }[];
   uiBlocks: UIBlock[];
+  imageSet?: {
+    cyclic: boolean;
+    autoplay: boolean;
+    interval?: number;
+    pauseOnHover?: boolean;
+  }
 }
 
 export const defaultConfig: UIConfig = {
@@ -37,6 +45,7 @@ export const defaultConfig: UIConfig = {
     SavePlugin,
     FullscreenPlugin,
     LoadImagePlugin,
+    ImageSetPlugin,
   ],
   uiBlocks: [
     {
@@ -75,5 +84,11 @@ export const defaultConfig: UIConfig = {
         }
       ]
     }
-  ]
+  ],
+  imageSet: {
+    cyclic: true,
+    autoplay: true,
+    interval: 2000,
+    pauseOnHover: true,
+  }
 }
