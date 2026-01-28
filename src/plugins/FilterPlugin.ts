@@ -1,50 +1,23 @@
 import { ComparisonSlider } from '../core/ComparisonSlider'
-import { SliderHtmlBuilder } from '../core/SliderHtmlBuilder'
+import { UIConfig } from '../config'
 
 export class FilterPlugin {
-  private readonly slider: ComparisonSlider
   private uiPanel!: HTMLElement
   private toggleButton!: HTMLButtonElement
   private filterButtons!: HTMLButtonElement[]
+  private readonly slider: ComparisonSlider
 
-  constructor(slider: ComparisonSlider) {
+  constructor(slider: ComparisonSlider, _config: UIConfig) {
     this.slider = slider
   }
 
   public initialize() {
-    this.createUI()
+    this.uiPanel = this.slider.container.querySelector('#filterPanel')!
+    this.toggleButton = this.slider.container.querySelector('#toggleButton')!
+    this.filterButtons = Array.from(this.uiPanel.querySelectorAll('.filter-buttons button'))
+
     this.bindEvents()
     this.setInitialFilter()
-  }
-
-  private createUI() {
-    const filterNamesStr = this.slider.originalImage.dataset.filters || 'Grayscale,Blur,Invert,Bright'
-    const filterNames = filterNamesStr.split(',').map(name => name.trim())
-
-    let filtersToRender = SliderHtmlBuilder.ALL_FILTERS
-    if (!filterNames.includes('all') && !filterNames.includes('*')) {
-      filtersToRender = SliderHtmlBuilder.ALL_FILTERS.filter(filterDef =>
-        filterNames.some(name => name.trim() === filterDef.name)
-      )
-    }
-
-    const filtersHtml = filtersToRender.map(filterDef =>
-      `<button data-filter="${filterDef.value}">${filterDef.name}</button>`
-    ).join('')
-
-    this.uiPanel = document.createElement('div')
-    this.uiPanel.className = 'ui-panel'
-    this.uiPanel.innerHTML = `<div class="filter-buttons">${filtersHtml}</div>`
-
-    this.toggleButton = document.createElement('button')
-    this.toggleButton.className = 'ui-toggle-button'
-    this.toggleButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>`
-
-    const covered = this.slider.container.querySelector('.covered')!
-    covered.appendChild(this.uiPanel)
-    this.slider.container.appendChild(this.toggleButton) // Append to the main container
-
-    this.filterButtons = Array.from(this.uiPanel.querySelectorAll('.filter-buttons button'))
   }
 
   private bindEvents() {

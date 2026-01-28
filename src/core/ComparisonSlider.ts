@@ -7,24 +7,26 @@ export interface Plugin {
   initialize(): void;
 }
 
-export class ComparisonSlider
-{
+export class ComparisonSlider {
   public readonly originalImage: HTMLImageElement
   public readonly container: HTMLElement
-  public readonly plugins: Plugin[] = []
   public filterEngine!: FilterEngine
+  private readonly plugins: Plugin[] = []
+  private readonly config: UIConfig
 
   private dragController!: DragController
   private resizeObserver!: ResizeObserver
 
-  constructor(img: HTMLImageElement, _config: UIConfig)
+  constructor(img: HTMLImageElement, config: UIConfig)
   {
     this.originalImage = img
-    this.container = SliderHtmlBuilder.enhanceImage(img)
+    this.config = config
+    this.container = SliderHtmlBuilder.enhanceImage(img, this.config)
     this.init().catch(console.error)
   }
 
-  public addPlugin(plugin: Plugin) {
+  public addPlugin(plugin: Plugin)
+  {
     this.plugins.push(plugin)
   }
 
@@ -37,7 +39,6 @@ export class ComparisonSlider
     const filteredCanvas = covered.querySelector('.filtered-canvas')! as HTMLCanvasElement
     const handleLine = covered.querySelector('.handle-line')! as HTMLElement
     const handleGrip = this.container.querySelector('.handle-grip')! as HTMLElement
-
     const direction = covered.dataset.direction as 'horizontal' | 'vertical'
 
     this.filterEngine = new FilterEngine(originalCanvas, filteredCanvas, this.originalImage)
@@ -54,6 +55,7 @@ export class ComparisonSlider
     if (this.originalImage.complete && this.originalImage.naturalWidth > 0) {
       return Promise.resolve()
     }
+
     return new Promise(resolve => {
       this.originalImage.addEventListener('load', () => resolve(), { once: true })
     })
@@ -64,11 +66,13 @@ export class ComparisonSlider
       this.filterEngine.redraw()
       this.resetPosition()
     })
+
     this.resizeObserver.observe(this.container)
   }
 
   private resetPosition() {
     const covered = this.container.querySelector('.covered')! as HTMLElement
+
     const initX = parseInt(covered.dataset.initX || '0', 10)
     const initY = parseInt(covered.dataset.initY || '0', 10)
 

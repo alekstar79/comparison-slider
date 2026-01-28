@@ -38,26 +38,19 @@ export const defaultConfig: UIConfig = {
   uiBlocks: [
     {
       id: 'filterPanel',
-      position: { bottom: '0', left: '0', right: '0', transform: 'translateY(100%)' },
+      position: { bottom: '0', left: '0', right: '0' },
       direction: 'horizontal',
-      buttons: []
+      buttons: [] // Dynamically filled by FilterPlugin
     },
     {
-      id: 'uiToggleButton',
-      position: { bottom: '10px', right: '10px' },
-      direction: 'horizontal',
+      id: 'actionButtons',
+      position: { top: '10px', right: '10px' },
+      direction: 'vertical',
       buttons: [
         {
           id: 'toggleButton',
           iconSvg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>`
-        }
-      ]
-    },
-    {
-      id: 'saveButtonBlock',
-      position: { bottom: '10px', right: '60px' },
-      direction: 'horizontal',
-      buttons: [
+        },
         {
           id: 'saveButton',
           pluginId: 'SavePlugin',
@@ -65,5 +58,5 @@ export const defaultConfig: UIConfig = {
         }
       ]
     }
-  ],
-};
+  ]
+}
