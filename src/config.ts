@@ -1,7 +1,8 @@
 import { SavePlugin } from './plugins/SavePlugin'
+import { FilterPlugin } from './plugins/FilterPlugin'
 import { Plugin } from './core/ComparisonSlider'
 
-interface ButtonPosition {
+export interface ButtonPosition {
   bottom?: string;
   top?: string;
   left?: string;
@@ -9,21 +10,60 @@ interface ButtonPosition {
   transform?: string;
 }
 
+export interface UIButton {
+  id: string;
+  text?: string;
+  iconSvg?: string;
+  filterValue?: string;
+  pluginId?: string;
+}
+
+export interface UIBlock {
+  id: string;
+  position: ButtonPosition;
+  direction: 'horizontal' | 'vertical';
+  buttons: UIButton[];
+}
+
 export interface UIConfig {
-  plugins: { new (slider: any): Plugin }[]; // Array of plugin classes
-  buttonPositions: {
-    uiToggleButton: ButtonPosition;
-    saveButton: ButtonPosition;
-    // Add other buttons here as needed
-  };
+  plugins: { new (slider: any, config: UIConfig): Plugin }[];
+  uiBlocks: UIBlock[];
 }
 
 export const defaultConfig: UIConfig = {
   plugins: [
-    SavePlugin, // SavePlugin will be initialized if present here
+    FilterPlugin,
+    SavePlugin,
   ],
-  buttonPositions: {
-    uiToggleButton: { bottom: '10px', right: '10px' },
-    saveButton: { bottom: '10px', right: '60px' }, // Example position for save button
-  },
+  uiBlocks: [
+    {
+      id: 'filterPanel',
+      position: { bottom: '0', left: '0', right: '0', transform: 'translateY(100%)' },
+      direction: 'horizontal',
+      buttons: []
+    },
+    {
+      id: 'uiToggleButton',
+      position: { bottom: '10px', right: '10px' },
+      direction: 'horizontal',
+      buttons: [
+        {
+          id: 'toggleButton',
+          iconSvg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>`
+        }
+      ]
+    },
+    {
+      id: 'saveButtonBlock',
+      position: { bottom: '10px', right: '60px' },
+      direction: 'horizontal',
+      buttons: [
+        {
+          id: 'saveButton',
+          pluginId: 'SavePlugin',
+          iconSvg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>`
+        }
+      ]
+    }
+  ],
 };

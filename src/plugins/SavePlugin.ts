@@ -1,5 +1,4 @@
 import { ComparisonSlider } from '../core/ComparisonSlider'
-import { defaultConfig } from '../config' // Import the default configuration
 
 export class SavePlugin {
   private readonly slider: ComparisonSlider
@@ -11,7 +10,7 @@ export class SavePlugin {
 
   public initialize() {
     this.createButton()
-    this.applyStyles()
+    this.injectStyles()
     this.bindEvents()
   }
 
@@ -20,13 +19,6 @@ export class SavePlugin {
     this.saveButton.className = 'save-button'
     this.saveButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>`
     this.slider.container.appendChild(this.saveButton)
-  }
-
-  private applyStyles() {
-    const position = defaultConfig.buttonPositions.saveButton
-    if (position) {
-      Object.assign(this.saveButton.style, position)
-    }
   }
 
   private bindEvents() {
@@ -61,5 +53,12 @@ export class SavePlugin {
       return activeFilterButton.textContent?.toLowerCase().replace(/\s/g, '-') || null
     }
     return null
+  }
+
+  private injectStyles() {
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = './src/plugins/SavePlugin.css'
+    document.head.appendChild(link)
   }
 }

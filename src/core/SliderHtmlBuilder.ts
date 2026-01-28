@@ -1,8 +1,6 @@
-import { defaultConfig } from '../config' // Import the default configuration
-
 export class SliderHtmlBuilder
 {
-  private static readonly ALL_FILTERS = [
+  public static readonly ALL_FILTERS = [
     // Basic
     { name: 'Grayscale', value: 'grayscale(100%)' },
     { name: 'Blur', value: 'blur(3px)' },
@@ -26,7 +24,19 @@ export class SliderHtmlBuilder
     { name: 'Glow', value: 'brightness(130%) contrast(120%) drop-shadow(0 0 5px rgba(255,255,255,0.8))' },
     { name: 'Vintage', value: 'sepia(60%) brightness(110%) contrast(110%)' },
     { name: 'Cold', value: 'hue-rotate(-20deg) contrast(110%) brightness(95%)' },
-    { name: 'Warm', value: 'hue-rotate(20deg) saturate(120%) brightness(105%)' }
+    { name: 'Warm', value: 'hue-rotate(20deg) saturate(120%) brightness(105%)' },
+    
+    // Creative
+    { name: 'Cinematic', value: 'contrast(1.2) saturate(1.2) sepia(0.3)' },
+    { name: 'Duotone', value: 'contrast(1.5) hue-rotate(-35deg) saturate(2)' },
+    { name: 'Neon', value: 'brightness(1.5) contrast(1.5) saturate(1.5) hue-rotate(290deg)' },
+    { name: 'Matrix', value: 'contrast(1.2) saturate(0.8) hue-rotate(90deg) brightness(0.8)' },
+    
+    // New Creative Filters
+    { name: 'Noir', value: 'grayscale(1) contrast(1.3) brightness(0.9)' },
+    { name: 'Lomo', value: 'contrast(1.4) saturate(1.1) brightness(0.9) sepia(0.2)' },
+    { name: 'Pop Art', value: 'contrast(1.8) saturate(2.5) brightness(1.1) hue-rotate(15deg)' },
+    { name: 'Old Photo', value: 'sepia(0.5) contrast(1.1) brightness(0.9) saturate(0.8)' }
   ]
 
   static enhanceImage(img: HTMLImageElement): HTMLElement
@@ -39,51 +49,21 @@ export class SliderHtmlBuilder
     const initX = img.dataset.initX || '25'
     const initY = img.dataset.initY || '25'
 
-    const filterNamesStr = img.dataset.filters || 'Grayscale,Blur,Invert,Bright'
-    const filterNames = filterNamesStr.split(',').map(name => name.trim())
-
-    let filtersToRender = SliderHtmlBuilder.ALL_FILTERS
-
-    if (!filterNames.includes('all') && !filterNames.includes('*')) {
-      filtersToRender = SliderHtmlBuilder.ALL_FILTERS.filter(filterDef =>
-        filterNames.some(name => name.trim() === filterDef.name)
-      )
-    }
-
-    const filtersHtml = filtersToRender.map(filterDef =>
-      `<button data-filter="${filterDef.value}">${filterDef.name}</button>`
-    ).join('')
-
     container.innerHTML = `<div 
       class="covered" 
       data-direction="${direction}" 
       data-init-x="${initX}" 
       data-init-y="${initY}"
-      style="${img.style.cssText}"
     >
       <canvas class="original-canvas"></canvas>
       <canvas class="filtered-canvas"></canvas>
       <div class="handle-line"></div>
-      <div class="ui-panel">
-        <div class="filter-buttons">${filtersHtml}</div>
-      </div>
-      <button class="ui-toggle-button">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
-        </svg>
-      </button>
     </div>
     <div class="handle-grip"></div>`
 
     const parent = img.parentNode!
     parent.insertBefore(container, img)
     parent.removeChild(img)
-
-    // Apply button positions from config
-    const uiToggleButton = container.querySelector('.ui-toggle-button') as HTMLElement
-    if (uiToggleButton && defaultConfig.buttonPositions.uiToggleButton) {
-      Object.assign(uiToggleButton.style, defaultConfig.buttonPositions.uiToggleButton)
-    }
 
     return container
   }
