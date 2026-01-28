@@ -17,7 +17,7 @@ export function renderDissolveTransition(
   const numPixelsToDissolve = Math.floor(engine.pixelCoordinates!.length * progress)
 
   for (let i = 0; i < engine.pixelCoordinates!.length; i++) {
-    const { x, y } = engine.pixelCoordinates![i]
+    const { x, y } = engine.pixelCoordinates![i] as typeof engine.pixelCoordinates[0]
     const pixelIndex = (y * fromData.width + x) * 4
 
     const sourceData = i < numPixelsToDissolve ? toData.data : fromData.data
