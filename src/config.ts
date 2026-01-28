@@ -1,5 +1,5 @@
-import { SavePlugin } from './plugins/SavePlugin'
 import { FilterPlugin } from './plugins/FilterPlugin'
+import { SavePlugin } from './plugins/SavePlugin'
 import { Plugin } from './core/ComparisonSlider'
 
 export interface ButtonPosition {

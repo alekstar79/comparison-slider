@@ -1,7 +1,5 @@
 import { ComparisonSlider } from './core/ComparisonSlider'
 import { defaultConfig } from './config'
-import { FilterPlugin } from './plugins/FilterPlugin'
-import { SavePlugin } from './plugins/SavePlugin'
 
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-comparison-slide]').forEach(img => {

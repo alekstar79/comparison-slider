@@ -11,18 +11,16 @@ export class ComparisonSlider
 {
   public readonly originalImage: HTMLImageElement
   public readonly container: HTMLElement
+  public readonly plugins: Plugin[] = []
   public filterEngine!: FilterEngine
-  private readonly plugins: Plugin[] = []
-  private readonly config: UIConfig
 
   private dragController!: DragController
   private resizeObserver!: ResizeObserver
 
-  constructor(img: HTMLImageElement, config: UIConfig)
+  constructor(img: HTMLImageElement, _config: UIConfig)
   {
     this.originalImage = img
-    this.config = config
-    this.container = SliderHtmlBuilder.enhanceImage(img, this.config)
+    this.container = SliderHtmlBuilder.enhanceImage(img)
     this.init().catch(console.error)
   }
 
@@ -39,11 +37,11 @@ export class ComparisonSlider
     const filteredCanvas = covered.querySelector('.filtered-canvas')! as HTMLCanvasElement
     const handleLine = covered.querySelector('.handle-line')! as HTMLElement
     const handleGrip = this.container.querySelector('.handle-grip')! as HTMLElement
-    
+
     const direction = covered.dataset.direction as 'horizontal' | 'vertical'
 
     this.filterEngine = new FilterEngine(originalCanvas, filteredCanvas, this.originalImage)
-    
+
     this.dragController = new DragController(covered, handleGrip, handleLine, filteredCanvas, direction)
     this.resetPosition()
 
@@ -73,7 +71,7 @@ export class ComparisonSlider
     const covered = this.container.querySelector('.covered')! as HTMLElement
     const initX = parseInt(covered.dataset.initX || '0', 10)
     const initY = parseInt(covered.dataset.initY || '0', 10)
-    
+
     const newX = (initX / this.originalImage.naturalWidth) * covered.clientWidth
     const newY = (initY / this.originalImage.naturalHeight) * covered.clientHeight
 

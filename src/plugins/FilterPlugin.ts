@@ -42,7 +42,7 @@ export class FilterPlugin {
 
     const covered = this.slider.container.querySelector('.covered')!
     covered.appendChild(this.uiPanel)
-    covered.appendChild(this.toggleButton)
+    this.slider.container.appendChild(this.toggleButton) // Append to the main container
 
     this.filterButtons = Array.from(this.uiPanel.querySelectorAll('.filter-buttons button'))
   }
