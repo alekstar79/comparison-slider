@@ -8,26 +8,35 @@ export interface Plugin {
 }
 
 export class ComparisonSlider {
-  public readonly originalImage: HTMLImageElement
+  public originalImage: HTMLImageElement
   public readonly container: HTMLElement
-  public filterEngine!: FilterEngine
-  private readonly plugins: Plugin[] = []
-  private readonly config: UIConfig
+  public readonly plugins: Plugin[] = []
+  public readonly config: UIConfig
 
-  private dragController!: DragController
-  private resizeObserver!: ResizeObserver
+  public filterEngine!: FilterEngine
+  public dragController!: DragController
+  public resizeObserver!: ResizeObserver
 
   constructor(img: HTMLImageElement, config: UIConfig)
   {
     this.originalImage = img
     this.config = config
+
     this.container = SliderHtmlBuilder.enhanceImage(img, this.config)
     this.init().catch(console.error)
   }
 
-  public addPlugin(plugin: Plugin)
-  {
+  public addPlugin(plugin: Plugin) {
     this.plugins.push(plugin)
+  }
+
+  public async updateImage(newSrc: string) {
+    this.originalImage.src = newSrc
+
+    await this.ensureImageLoaded()
+
+    this.filterEngine.redraw()
+    this.resetPosition()
   }
 
   private async init()
@@ -42,7 +51,6 @@ export class ComparisonSlider {
     const direction = covered.dataset.direction as 'horizontal' | 'vertical'
 
     this.filterEngine = new FilterEngine(originalCanvas, filteredCanvas, this.originalImage)
-
     this.dragController = new DragController(covered, handleGrip, handleLine, filteredCanvas, direction)
     this.resetPosition()
 
@@ -57,7 +65,9 @@ export class ComparisonSlider {
     }
 
     return new Promise(resolve => {
-      this.originalImage.addEventListener('load', () => resolve(), { once: true })
+      this.originalImage.addEventListener('load', () => resolve(), {
+        once: true
+      })
     })
   }
 

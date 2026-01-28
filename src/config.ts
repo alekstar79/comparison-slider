@@ -1,5 +1,6 @@
 import { FilterPlugin } from './plugins/FilterPlugin'
 import { FullscreenPlugin } from './plugins/FullscreenPlugin'
+import { LoadImagePlugin } from './plugins/LoadImagePlugin'
 import { SavePlugin } from './plugins/SavePlugin'
 import { Plugin } from './core/ComparisonSlider'
 
@@ -35,6 +36,7 @@ export const defaultConfig: UIConfig = {
     FilterPlugin,
     SavePlugin,
     FullscreenPlugin,
+    LoadImagePlugin,
   ],
   uiBlocks: [
     {
@@ -48,6 +50,10 @@ export const defaultConfig: UIConfig = {
       position: { bottom: '10px', right: '10px' },
       direction: 'horizontal',
       buttons: [
+        {
+          id: 'uploadButton',
+          iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="24px" height="24px" fill="currentColor"><path d="M3 6L6 6L6 12L10 12L10 6L13 6V5L8 0L3 5L3 6Z"/></svg>'
+        },
         {
           id: 'saveButton',
           iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>'
