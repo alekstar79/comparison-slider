@@ -19,6 +19,7 @@ export class ImageSetPlugin {
 
   public async initialize() {
     const imgSetAttr = this.slider.originalImage.dataset.imgset
+
     if (imgSetAttr === undefined) return
 
     const imageUrls = imgSetAttr ? imgSetAttr.split(',').map(s => s.trim()) : []
@@ -30,6 +31,7 @@ export class ImageSetPlugin {
 
     if (imageUrls.length > 0) {
       this.images = await this.preloadImages(imageUrls)
+
       if (this.images.length > 1) {
         this.createButtons()
         this.bindEvents()
@@ -40,12 +42,13 @@ export class ImageSetPlugin {
 
   public async addImages(newImageUrls: string[]) {
     const newImages = await this.preloadImages(newImageUrls)
-    this.images.push(...newImages)
 
+    this.images.push(...newImages)
     if (this.images.length > 1 && !this.nextButton) {
       this.createButtons()
       this.bindEvents()
     }
+
     if (newImages.length > 0) {
       this.currentIndex = this.images.length - newImages.length
       await this.slider.updateImage(this.images[this.currentIndex], false) // Do not reset position
@@ -92,6 +95,7 @@ export class ImageSetPlugin {
 
   private async navigate(direction: 'next' | 'previous', userInitiated = false) {
     if (this.isTransitioning) return
+
     this.isTransitioning = true
     if (userInitiated) {
       this.stopAutoplay()
@@ -117,6 +121,7 @@ export class ImageSetPlugin {
 
   private calculateNewIndex(direction: 'next' | 'previous'): number {
     let newIndex = this.currentIndex
+
     if (direction === 'next') {
       newIndex++
       if (newIndex >= this.images.length) {
@@ -128,6 +133,7 @@ export class ImageSetPlugin {
         newIndex = this.config.imageSet?.cyclic ? this.images.length - 1 : 0
       }
     }
+
     return newIndex
   }
 
@@ -139,10 +145,27 @@ export class ImageSetPlugin {
 
     const animate = (timestamp: number) => {
       if (!startTime) startTime = timestamp
+
       const elapsedTime = timestamp - startTime
       const progress = Math.min(elapsedTime / duration, 1)
 
-      this.slider.filterEngine.renderSlideTransition(fromImg, toImg, progress, direction)
+      switch (this.config.imageSet?.transitionEffect) {
+        case 'blinds':
+          this.slider.filterEngine.renderBlindsTransition(fromImg, toImg, progress, direction)
+          break
+        case 'dissolve':
+          this.slider.filterEngine.renderDissolveTransition(fromImg, toImg, progress)
+          break
+        case 'wipe':
+          this.slider.filterEngine.renderWipeTransition(fromImg, toImg, progress)
+          break
+        case 'wave':
+          this.slider.filterEngine.renderWaveTransition(fromImg, toImg, progress, direction)
+          break
+        default:
+          this.slider.filterEngine.renderSlideTransition(fromImg, toImg, progress, direction)
+          break
+      }
 
       if (progress < 1) {
         requestAnimationFrame(animate)
@@ -156,7 +179,9 @@ export class ImageSetPlugin {
 
   private startAutoplay() {
     if (this.config.imageSet?.autoplay && this.images.length > 1 && !this.autoplayTimer) {
-      this.autoplayTimer = window.setInterval(() => this.navigate('next'), this.config.imageSet?.interval || 3000)
+      this.autoplayTimer = window.setInterval(() => {
+        return this.navigate('next')
+      }, this.config.imageSet?.interval || 3000)
     }
   }
 

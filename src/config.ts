@@ -1,9 +1,8 @@
-import { ImageSetPlugin } from './plugins/ImageSetPlugin'
 import { FilterPlugin } from './plugins/FilterPlugin'
+import { SavePlugin } from './plugins/SavePlugin'
 import { FullscreenPlugin } from './plugins/FullscreenPlugin'
 import { LoadImagePlugin } from './plugins/LoadImagePlugin'
-import { SavePlugin } from './plugins/SavePlugin'
-
+import { ImageSetPlugin } from './plugins/ImageSetPlugin'
 import { Plugin } from './core/ComparisonSlider'
 
 export interface ButtonPosition {
@@ -36,6 +35,7 @@ export interface UIConfig {
     autoplay: boolean;
     interval?: number;
     pauseOnHover?: boolean;
+    transitionEffect?: 'slide' | 'blinds' | 'dissolve' | 'wipe' | 'wave';
   }
 }
 
@@ -90,5 +90,6 @@ export const defaultConfig: UIConfig = {
     autoplay: true,
     interval: 2000,
     pauseOnHover: true,
+    transitionEffect: 'wave',
   }
 }
