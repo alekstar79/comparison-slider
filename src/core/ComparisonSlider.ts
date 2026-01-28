@@ -56,6 +56,7 @@ export class ComparisonSlider {
 
     if (imgSetAttr) {
       const images = imgSetAttr.split(',').map(s => s.trim())
+
       if (images.length > 0) {
         this.originalImage.src = images[0]
       }
@@ -72,10 +73,9 @@ export class ComparisonSlider {
 
     this.filterEngine = new FilterEngine(originalCanvas, filteredCanvas, this.originalImage)
     this.dragController = new DragController(covered, handleGrip, handleLine, filteredCanvas, direction)
+
     this.resetPosition()
-
     this.plugins.forEach(plugin => plugin.initialize())
-
     this.setupResizeObserver()
   }
 

@@ -88,8 +88,8 @@ export const defaultConfig: UIConfig = {
   imageSet: {
     cyclic: true,
     autoplay: true,
-    interval: 2000,
+    interval: 3000,
     pauseOnHover: true,
-    transitionEffect: 'wave',
+    transitionEffect: 'slide',
   }
 }

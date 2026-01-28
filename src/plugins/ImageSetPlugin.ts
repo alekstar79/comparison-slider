@@ -23,7 +23,6 @@ export class ImageSetPlugin {
     if (imgSetAttr === undefined) return
 
     const imageUrls = imgSetAttr ? imgSetAttr.split(',').map(s => s.trim()) : []
-
     const originalSrc = this.slider.originalImage.src.split('/').pop()
     if (originalSrc && !imageUrls.some(url => url.includes(originalSrc))) {
       imageUrls.unshift(this.slider.originalImage.src)
@@ -91,6 +90,14 @@ export class ImageSetPlugin {
       this.slider.container.addEventListener('mouseenter', () => this.stopAutoplay())
       this.slider.container.addEventListener('mouseleave', () => this.startAutoplay())
     }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        this.stopAutoplay()
+      } else {
+        this.startAutoplay()
+      }
+    })
   }
 
   private async navigate(direction: 'next' | 'previous', userInitiated = false) {
@@ -179,9 +186,7 @@ export class ImageSetPlugin {
 
   private startAutoplay() {
     if (this.config.imageSet?.autoplay && this.images.length > 1 && !this.autoplayTimer) {
-      this.autoplayTimer = window.setInterval(() => {
-        return this.navigate('next')
-      }, this.config.imageSet?.interval || 3000)
+      this.autoplayTimer = window.setInterval(() => this.navigate('next'), this.config.imageSet?.interval || 3000)
     }
   }
 

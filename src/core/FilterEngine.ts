@@ -80,7 +80,7 @@ export class FilterEngine {
 
       this.filteredCtx.save()
       this.filteredCtx.beginPath()
-      this.filteredCtx.rect(blindX, 0, width, this.filteredCanvas.height)
+      this.filteredCtx.rect(blindX, 0, width, this.originalCanvas.height)
       this.filteredCtx.clip()
       this.drawOnCanvas(this.filteredCtx, toImg)
       this.filteredCtx.restore()
@@ -99,7 +99,6 @@ export class FilterEngine {
     const fromData = this.getImageData(fromImg)
     const toData = this.getImageData(toImg)
     const newData = this.originalCtx.createImageData(fromData.width, fromData.height)
-
     const numPixelsToDissolve = Math.floor(this.pixelCoordinates.length * progress)
 
     for (let i = 0; i < this.pixelCoordinates.length; i++) {
@@ -163,22 +162,27 @@ export class FilterEngine {
     const waveSpeed = 15
 
     for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const waveOffset = Math.sin(y / waveFrequency + progress * waveSpeed) * waveAmplitude
-        let transitionPoint = progress * (width + waveAmplitude * 2) - waveAmplitude
+      const waveOffset = Math.sin(y / waveFrequency + progress * waveSpeed) * waveAmplitude
+      let transitionPoint = progress * (width + waveAmplitude * 2) - waveAmplitude
 
-        if (direction === 'next') { // Inverted the logic here
-          transitionPoint = width - transitionPoint
-        }
+      if (direction === 'next') { // Inverted the logic here
+        transitionPoint = width - transitionPoint
+      }
 
-        const threshold = transitionPoint + waveOffset
-        const pixelIndex = (y * width + x) * 4
-        const sourceData = (direction === 'next' && x > threshold) || (direction === 'previous' && x < threshold) ? toData.data : fromData.data
+      const threshold = Math.round(transitionPoint + waveOffset)
+      const pixelIndex = (y * width) * 4
 
-        newData.data[pixelIndex] = sourceData[pixelIndex]
-        newData.data[pixelIndex + 1] = sourceData[pixelIndex + 1]
-        newData.data[pixelIndex + 2] = sourceData[pixelIndex + 2]
-        newData.data[pixelIndex + 3] = sourceData[pixelIndex + 3]
+      const fromStart = pixelIndex + Math.max(0, threshold) * 4
+      const fromEnd = pixelIndex + width * 4
+      const toStart = pixelIndex
+      const toEnd = pixelIndex + Math.min(width, threshold) * 4
+
+      if (direction === 'previous') {
+        if (fromStart < fromEnd) newData.data.set(fromData.data.subarray(fromStart, fromEnd), fromStart)
+        if (toStart < toEnd) newData.data.set(toData.data.subarray(toStart, toEnd), toStart)
+      } else {
+        if (fromStart < fromEnd) newData.data.set(toData.data.subarray(fromStart, fromEnd), fromStart)
+        if (toStart < toEnd) newData.data.set(fromData.data.subarray(toStart, toEnd), toStart)
       }
     }
 

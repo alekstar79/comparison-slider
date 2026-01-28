@@ -71,6 +71,7 @@ export class DragController {
     this.handleGrip.addEventListener('mousedown', onStart)
     document.addEventListener('mousemove', onMove)
     document.addEventListener('mouseup', onEnd)
+
     this.handleGrip.addEventListener('touchstart', onStart, { passive: false })
     document.addEventListener('touchmove', onMove, { passive: false })
     document.addEventListener('touchend', onEnd)
@@ -78,11 +79,15 @@ export class DragController {
 
   private scheduleUpdate() {
     if (this.animationFrameId) return
-    this.animationFrameId = requestAnimationFrame(() => this.updateClip())
+
+    this.animationFrameId = requestAnimationFrame(() => {
+      this.updateClip()
+    })
   }
 
   private updateClip() {
     this.animationFrameId = null
+
     if (this.direction === 'horizontal') {
       this.filteredCanvas.style.clipPath = `inset(0 calc(100% - ${this.posX}px) 0 0)`
       this.handleLine.style.transform = `translateX(${this.posX}px)`
