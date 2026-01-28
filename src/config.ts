@@ -52,7 +52,7 @@ export const defaultConfig: UIConfig = {
       buttons: [
         {
           id: 'uploadButton',
-          iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="24px" height="24px" fill="currentColor"><path d="M3 6L6 6L6 12L10 12L10 6L13 6V5L8 0L3 5L3 6Z"/></svg>'
+          iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>'
         },
         {
           id: 'saveButton',
