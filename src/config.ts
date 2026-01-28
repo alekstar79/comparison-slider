@@ -1,4 +1,5 @@
 import { FilterPlugin } from './plugins/FilterPlugin'
+import { FullscreenPlugin } from './plugins/FullscreenPlugin'
 import { SavePlugin } from './plugins/SavePlugin'
 import { Plugin } from './core/ComparisonSlider'
 
@@ -15,7 +16,6 @@ export interface UIButton {
   text?: string;
   iconSvg?: string;
   filterValue?: string;
-  pluginId?: string;
 }
 
 export interface UIBlock {
@@ -34,6 +34,7 @@ export const defaultConfig: UIConfig = {
   plugins: [
     FilterPlugin,
     SavePlugin,
+    FullscreenPlugin,
   ],
   uiBlocks: [
     {
@@ -49,7 +50,6 @@ export const defaultConfig: UIConfig = {
       buttons: [
         {
           id: 'saveButton',
-          pluginId: 'SavePlugin',
           iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>'
         },
         {
@@ -65,7 +65,7 @@ export const defaultConfig: UIConfig = {
       buttons: [
         {
           id: 'fullscreenButton',
-          iconSvg: `F`
+          iconSvg: `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0z" fill="none"/><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 2h-2v3h-3v2h5v-5zm-3-4V5h-2v5h5V7h-3z"/></svg>`
         }
       ]
     }
