@@ -8,6 +8,7 @@ export class MagnifierPlugin implements Plugin {
   private magnifierCanvas!: HTMLCanvasElement
   private ctx!: CanvasRenderingContext2D
   private isEnabled = false
+  private lastMousePosition: { x: number; y: number } | null = null
 
   constructor(slider: ComparisonSlider, config: UIConfig) {
     this.slider = slider
@@ -51,7 +52,12 @@ export class MagnifierPlugin implements Plugin {
     this.isEnabled = !this.isEnabled
     document.querySelector(this.config.magnifier.button)?.classList.toggle('active', this.isEnabled)
 
-    if (!this.isEnabled) {
+    if (this.isEnabled) {
+      if (this.lastMousePosition) {
+        this.show()
+        this.update(this.lastMousePosition.x, this.lastMousePosition.y)
+      }
+    } else {
       this.hide()
     }
   }
@@ -65,21 +71,23 @@ export class MagnifierPlugin implements Plugin {
   }
 
   private onMouseMove(e: MouseEvent): void {
+    const rect = this.slider.container.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    this.lastMousePosition = { x, y }
+
     if (this.isEnabled) {
       this.show()
-      this.update(e)
+      this.update(x, y)
     }
   }
 
   private onMouseLeave(): void {
+    this.lastMousePosition = null
     this.hide()
   }
 
-  private update(e: MouseEvent): void {
-    const rect = this.slider.container.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-
+  private update(x: number, y: number): void {
     this.magnifierEl.style.left = `${x}px`
     this.magnifierEl.style.top = `${y}px`
 
