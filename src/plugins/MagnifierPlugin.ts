@@ -257,13 +257,19 @@ export class MagnifierPlugin implements Plugin {
     const handleY = this.slider.dragController.posY
     const direction = coveredEl.dataset.direction as 'horizontal' | 'vertical'
 
-    const handlePosition = direction === 'horizontal' ? handleX : y
+    const handlePosition = direction === 'horizontal' ? handleX : handleY
     const cursorPosition = direction === 'horizontal' ? x : y
 
     const magnifierHandlePosition = ((handlePosition - cursorPosition) * zoom) + radius
 
     // 3. Clip and draw the filtered image
     this.ctx.save()
+
+    const currentFilter = this.slider.filterEngine.filteredCanvas.style.filter
+    if (currentFilter) {
+      this.ctx.filter = currentFilter
+    }
+
     this.ctx.beginPath()
     if (direction === 'horizontal') {
         this.ctx.rect(0, 0, magnifierHandlePosition, size)
@@ -271,7 +277,7 @@ export class MagnifierPlugin implements Plugin {
         this.ctx.rect(0, 0, size, magnifierHandlePosition)
     }
     this.ctx.clip()
-    this.ctx.drawImage(filteredCanvas, sx, sy, sw, sh, 0, 0, size, size)
+    this.ctx.drawImage(originalCanvas, sx, sy, sw, sh, 0, 0, size, size)
     this.ctx.restore()
 
     // 4. Draw UI elements
@@ -286,7 +292,7 @@ export class MagnifierPlugin implements Plugin {
     const radius = size / 2
     const containerRect = this.slider.container.getBoundingClientRect()
 
-    const elements = this.slider.container.querySelectorAll('.ui-block button, .handle-grip, .handle-line, .nav-button, .ui-panel, .filter-buttons button');
+    const elements = this.slider.container.querySelectorAll('.ui-block button, .handle-grip, .handle-line, .nav-button, .ui-panel, .filter-buttons button')
 
     elements.forEach(el => {
       const htmlEl = el as HTMLElement
