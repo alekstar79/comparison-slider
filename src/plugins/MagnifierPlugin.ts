@@ -9,6 +9,7 @@ export class MagnifierPlugin implements Plugin {
   private ctx!: CanvasRenderingContext2D
   private isEnabled = false
   private lastMousePosition: { x: number; y: number } | null = null
+  private iconCache = new Map<string, HTMLImageElement>();
 
   constructor(slider: ComparisonSlider, config: UIConfig) {
     this.slider = slider
@@ -205,6 +206,7 @@ export class MagnifierPlugin implements Plugin {
         this.ctx.fillStyle = getComputedStyle(htmlEl).backgroundColor;
         this.ctx.globalAlpha = parseFloat(getComputedStyle(htmlEl).opacity);
 
+        // Draw background shape
         if (htmlEl.classList.contains('handle-grip') || htmlEl.tagName === 'BUTTON' || htmlEl.classList.contains('nav-button')) {
             this.ctx.beginPath();
             this.ctx.arc(dx + dWidth / 2, dy + dHeight / 2, dWidth / 2, 0, 2 * Math.PI);
@@ -222,6 +224,45 @@ export class MagnifierPlugin implements Plugin {
             } else {
                 this.ctx.strokeRect(dx, dy, dWidth, dHeight);
             }
+        }
+
+        // Draw icon
+        const svgEl = htmlEl.querySelector('svg');
+        const after = getComputedStyle(htmlEl, '::after');
+
+        if (svgEl) {
+            const color = getComputedStyle(htmlEl).color;
+            const svgString = svgEl.outerHTML.replace(/currentColor/g, color);
+            
+            let cachedImage = this.iconCache.get(svgString);
+            if (!cachedImage) {
+                const img = new Image();
+                img.onload = () => {
+                    if (this.isEnabled && this.lastMousePosition) {
+                        this.update(this.lastMousePosition.x, this.lastMousePosition.y);
+                    }
+                };
+                img.src = `data:image/svg+xml;base64,${btoa(svgString)}`;
+                cachedImage = img;
+                this.iconCache.set(svgString, cachedImage);
+            }
+
+            if (cachedImage.complete && cachedImage.naturalWidth > 0) {
+                const iconSize = dWidth * 0.55;
+                const iconX = dx + (dWidth - iconSize) / 2;
+                const iconY = dy + (dHeight - iconSize) / 2;
+                this.ctx.drawImage(cachedImage, iconX, iconY, iconSize, iconSize);
+            }
+        } else if (after.content && after.content !== 'none' && after.content !== '""') {
+            const text = after.content.replace(/['"]/g, '');
+            const baseFontSize = parseFloat(after.fontSize);
+            const magnifiedFontSize = baseFontSize * zoom;
+
+            this.ctx.font = `${magnifiedFontSize}px ${after.fontFamily}`;
+            this.ctx.fillStyle = after.color;
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillText(text, dx + dWidth / 2, dy + dHeight / 2);
         }
 
         this.ctx.restore();
