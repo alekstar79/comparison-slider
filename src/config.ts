@@ -19,7 +19,10 @@ export interface ButtonPosition {
 }
 
 export interface UIButton {
-  id: string;
+  tag?: string;
+  id?: string;
+  class?: string;
+  tip?: string;
   text?: string;
   iconSvg?: string;
   filterValue?: string;
@@ -27,6 +30,7 @@ export interface UIButton {
 
 export interface UIBlock {
   id: string;
+  class?: string;
   position: ButtonPosition;
   direction: 'horizontal' | 'vertical';
   buttons: UIButton[];
@@ -69,6 +73,28 @@ export const defaultConfig: UIConfig = {
       position: { bottom: '0', left: '0', right: '0' },
       direction: 'horizontal',
       buttons: [] // Dynamically filled by FilterPlugin
+    },
+    {
+      id: 'navButtons',
+      class: 'image-set-nav',
+      direction: 'horizontal',
+      position: { top: '50%', transform: 'translateY(-50%)', left: '0', right: '0' },
+      buttons: [
+        {
+          tag: 'button',
+          class: 'nav-button prev',
+          iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>',
+          text: 'Prev',
+          tip: 'Prev'
+        },
+        {
+          tag: 'button',
+          class: 'nav-button next',
+          iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>',
+          text: 'Next',
+          tip: 'Next'
+        }
+      ]
     },
     {
       id: 'actionButtons',

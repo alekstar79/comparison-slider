@@ -40,25 +40,10 @@ export class ImageSetPlugin {
       this.images = await this.preloadImages(imageUrls)
 
       if (this.images.length > 1) {
-        this.createButtons()
+        this.setButtons()
         this.bindEvents()
         this.startAutoplay()
       }
-    }
-  }
-
-  public async addImages(newImageUrls: string[]) {
-    const newImages = await this.preloadImages(newImageUrls)
-
-    this.images.push(...newImages)
-    if (this.images.length > 1 && !this.nextButton) {
-      this.createButtons()
-      this.bindEvents()
-    }
-
-    if (newImages.length > 0) {
-      this.currentIndex = this.images.length - newImages.length
-      await this.slider.updateImage(this.images[this.currentIndex], false) // Do not reset position
     }
   }
 
@@ -73,20 +58,24 @@ export class ImageSetPlugin {
     }))
   }
 
-  private createButtons() {
+  private setButtons() {
+    const options = this.config.uiBlocks.find(block => block.id === 'navButtons')! ?? {}
+    const { direction = 'horizontal', buttons: [prev, next] = [{}, {}] } = options
+
     const buttonContainer = document.createElement('div')
-    buttonContainer.className = 'image-set-nav'
+    buttonContainer.classList.add('ui-block', 'image-set-nav', direction)
 
     this.prevButton = document.createElement('button')
-    this.prevButton.className = 'nav-button prev'
-    this.prevButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>`
+    this.prevButton.innerHTML = prev.iconSvg ?? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>'
+    this.prevButton.className = prev.class || 'nav-button prev'
 
     this.nextButton = document.createElement('button')
-    this.nextButton.className = 'nav-button next'
-    this.nextButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>`
+    this.nextButton.innerHTML = next.iconSvg ?? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>'
+    this.nextButton.className = next.class || 'nav-button next'
 
     buttonContainer.appendChild(this.prevButton)
     buttonContainer.appendChild(this.nextButton)
+
     this.slider.container.appendChild(buttonContainer)
   }
 

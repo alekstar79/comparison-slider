@@ -47,6 +47,7 @@ export class DragController {
   private getClientPos(e: MouseEvent | TouchEvent) {
     const rect = this.boundary.getBoundingClientRect()
     const touch = 'touches' in e ? e.touches[0] : e
+
     return {
       x: touch.clientX - rect.left,
       y: touch.clientY - rect.top,
@@ -56,6 +57,7 @@ export class DragController {
   private bindEvents() {
     const onStart = (e: MouseEvent | TouchEvent) => {
       e.preventDefault()
+
       this.isDragging = true
       this.handleGrip.classList.add('draggable')
     }
@@ -63,6 +65,7 @@ export class DragController {
     const onMove = (e: MouseEvent | TouchEvent) => {
       if (!this.isDragging) return
       e.preventDefault()
+
       const { x, y } = this.getClientPos(e)
       this.setPosition(x, y)
     }

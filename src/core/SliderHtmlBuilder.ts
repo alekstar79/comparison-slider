@@ -22,33 +22,35 @@ export class SliderHtmlBuilder {
     </div>`
 
     let uiElementsHtml = ''
-    config.uiBlocks.forEach(block => {
-      let buttonsHtml: string
-      if (block.id === 'filterPanel') {
-        const filterNamesStr = img.dataset.filters || 'Grayscale,Blur,Invert,Bright'
-        const filterNames = filterNamesStr.split(',').map(name => name.trim())
-        let filtersToRender = SliderHtmlBuilder.ALL_FILTERS
+    config.uiBlocks
+      .filter(block => block.id !== 'navButtons')
+      .forEach(block => {
+        let buttonsHtml: string
+        if (block.id === 'filterPanel') {
+          const filterNamesStr = img.dataset.filters || 'Grayscale,Blur,Invert,Bright'
+          const filterNames = filterNamesStr.split(',').map(name => name.trim())
 
-        if (!filterNames.includes('all') && !filterNames.includes('*')) {
-          filtersToRender = SliderHtmlBuilder.ALL_FILTERS.filter(filterDef =>
-            filterNames.some(name => name.trim() === filterDef.name)
-          )
+          let filtersToRender = SliderHtmlBuilder.ALL_FILTERS
+          if (!filterNames.includes('all') && !filterNames.includes('*')) {
+            filtersToRender = SliderHtmlBuilder.ALL_FILTERS.filter(filterDef =>
+              filterNames.some(name => name.trim() === filterDef.name)
+            )
+          }
+
+          buttonsHtml = filtersToRender.map(filterDef =>
+            `<button data-filter="${filterDef.value}">${filterDef.name}</button>`
+          ).join('')
+
+          uiElementsHtml += `<div class="ui-panel" id="${block.id}">
+            <div class="filter-buttons">${buttonsHtml}</div>
+          </div>`
+        } else {
+          buttonsHtml = block.buttons.map(button =>
+            `<button ${button.id ? `id="${button.id}"` : ''} ${button.class ? `class="${button.class}"` : ''}>${button.iconSvg || button.text}</button>`
+          ).join('')
+          uiElementsHtml += `<div id="${block.id}" ${block.class ? `class="${block.class}"` : `class="ui-block ${block.direction}`}">${buttonsHtml}</div>`
         }
-
-        buttonsHtml = filtersToRender.map(filterDef =>
-          `<button data-filter="${filterDef.value}">${filterDef.name}</button>`
-        ).join('')
-
-        uiElementsHtml += `<div class="ui-panel" id="${block.id}">
-          <div class="filter-buttons">${buttonsHtml}</div>
-        </div>`
-      } else {
-        buttonsHtml = block.buttons.map(button =>
-          `<button class="${button.id}" id="${button.id}">${button.iconSvg || button.text}</button>`
-        ).join('')
-        uiElementsHtml += `<div class="ui-block ${block.direction}" id="${block.id}">${buttonsHtml}</div>`
-      }
-    })
+      })
 
     container.className = `slider-container ${img.className}`
     container.style.aspectRatio = `${img.naturalWidth} / ${img.naturalHeight}`
