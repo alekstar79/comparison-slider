@@ -1,15 +1,15 @@
 export class DragController {
   private readonly boundary: HTMLElement
   private readonly handleGrip: HTMLElement
-  private readonly handleLine: HTMLElement
+  public readonly handleLine: HTMLElement
   private readonly filteredCanvas: HTMLCanvasElement
   private readonly direction: 'horizontal' | 'vertical'
 
   private isDragging = false
   private animationFrameId: number | null = null
 
-  private posX = 200
-  private posY = 100
+  public posX = 200
+  public posY = 100
 
   constructor(
     boundary: HTMLElement,
@@ -31,7 +31,11 @@ export class DragController {
     this.bindEvents()
   }
 
-  setPosition(x: number, y: number) {
+  public getPosition(): { x: number; y: number } {
+    return { x: this.posX, y: this.posY };
+  }
+
+  public setPosition(x: number, y: number) {
     const { clientWidth, clientHeight } = this.boundary
     this.posX = Math.max(0, Math.min(clientWidth, x))
     this.posY = Math.max(0, Math.min(clientHeight, y))
