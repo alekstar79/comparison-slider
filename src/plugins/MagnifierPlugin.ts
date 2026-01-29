@@ -151,7 +151,7 @@ export class MagnifierPlugin implements Plugin {
     const handleY = this.slider.dragController.posY
     const direction = coveredEl.dataset.direction as 'horizontal' | 'vertical'
     
-    const handlePosition = direction === 'horizontal' ? handleX : handleY;
+    const handlePosition = direction === 'horizontal' ? handleX : y;
     const cursorPosition = direction === 'horizontal' ? x : y;
     
     const magnifierHandlePosition = ((handlePosition - cursorPosition) * zoom) + radius;
@@ -179,7 +179,7 @@ export class MagnifierPlugin implements Plugin {
     const radius = size / 2;
     const containerRect = this.slider.container.getBoundingClientRect();
 
-    const elements = this.slider.container.querySelectorAll('.ui-block button, .handle-grip, .handle-line');
+    const elements = this.slider.container.querySelectorAll('.ui-block button, .handle-grip, .handle-line, .nav-button');
 
     elements.forEach(el => {
         const htmlEl = el as HTMLElement;
@@ -205,7 +205,7 @@ export class MagnifierPlugin implements Plugin {
         this.ctx.fillStyle = getComputedStyle(htmlEl).backgroundColor;
         this.ctx.globalAlpha = parseFloat(getComputedStyle(htmlEl).opacity);
 
-        if (htmlEl.classList.contains('handle-grip') || htmlEl.tagName === 'BUTTON') {
+        if (htmlEl.classList.contains('handle-grip') || htmlEl.tagName === 'BUTTON' || htmlEl.classList.contains('nav-button')) {
             this.ctx.beginPath();
             this.ctx.arc(dx + dWidth / 2, dy + dHeight / 2, dWidth / 2, 0, 2 * Math.PI);
             this.ctx.fill();
@@ -217,7 +217,7 @@ export class MagnifierPlugin implements Plugin {
         if (borderWidth > 0) {
             this.ctx.strokeStyle = getComputedStyle(htmlEl).borderColor;
             this.ctx.lineWidth = borderWidth * zoom;
-            if (htmlEl.classList.contains('handle-grip') || htmlEl.tagName === 'BUTTON') {
+            if (htmlEl.classList.contains('handle-grip') || htmlEl.tagName === 'BUTTON' || htmlEl.classList.contains('nav-button')) {
                 this.ctx.stroke();
             } else {
                 this.ctx.strokeRect(dx, dy, dWidth, dHeight);
