@@ -1,9 +1,10 @@
-import { ImageSetPlugin } from './plugins/ImageSetPlugin'
 import { FilterPlugin } from './plugins/FilterPlugin'
 import { FullscreenPlugin } from './plugins/FullscreenPlugin'
+import { ImageSetPlugin } from './plugins/ImageSetPlugin'
 import { LoadImagePlugin } from './plugins/LoadImagePlugin'
-import { SavePlugin } from './plugins/SavePlugin'
 import { MagnifierPlugin } from './plugins/MagnifierPlugin'
+import { SavePlugin } from './plugins/SavePlugin'
+
 import { Plugin } from './core/ComparisonSlider'
 
 export interface ButtonPosition {
@@ -34,7 +35,8 @@ export interface UIConfig {
   magnifier: {
     button: string;
     size: number;
-    zoom: number;
+    defaultZoom: number;
+    zoomLevels: number[];
   };
   imageSet?: {
     cyclic: boolean;
@@ -99,7 +101,8 @@ export const defaultConfig: UIConfig = {
   magnifier: {
     button: '#magnifierButton',
     size: 150,
-    zoom: 2,
+    defaultZoom: 2,
+    zoomLevels: [1.5, 2, 3],
   },
   imageSet: {
     cyclic: true,
