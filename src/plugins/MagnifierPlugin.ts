@@ -180,13 +180,19 @@ export class MagnifierPlugin implements Plugin {
     const radius = size / 2;
     const containerRect = this.slider.container.getBoundingClientRect();
 
-    const elements = this.slider.container.querySelectorAll('.ui-block button, .handle-grip, .handle-line, .nav-button');
+    const elements = this.slider.container.querySelectorAll('.ui-block button, .handle-grip, .handle-line, .nav-button, .ui-panel, .filter-buttons button');
 
     elements.forEach(el => {
         const htmlEl = el as HTMLElement;
+        const styles = getComputedStyle(htmlEl);
+
+        if (htmlEl.id === 'filterPanel' && !htmlEl.classList.contains('open')) {
+            return;
+        }
+
         const rect = htmlEl.getBoundingClientRect();
 
-        if (rect.width === 0 || rect.height === 0 || getComputedStyle(htmlEl).display === 'none' || getComputedStyle(htmlEl).opacity === '0') {
+        if (rect.width === 0 || rect.height === 0 || styles.display === 'none' || styles.opacity === '0') {
             return;
         }
 
@@ -203,35 +209,33 @@ export class MagnifierPlugin implements Plugin {
         }
 
         this.ctx.save();
-        this.ctx.fillStyle = getComputedStyle(htmlEl).backgroundColor;
-        this.ctx.globalAlpha = parseFloat(getComputedStyle(htmlEl).opacity);
+        this.ctx.fillStyle = styles.backgroundColor;
+        this.ctx.globalAlpha = parseFloat(styles.opacity);
 
-        // Draw background shape
-        if (htmlEl.classList.contains('handle-grip') || htmlEl.tagName === 'BUTTON' || htmlEl.classList.contains('nav-button')) {
-            this.ctx.beginPath();
-            this.ctx.arc(dx + dWidth / 2, dy + dHeight / 2, dWidth / 2, 0, 2 * Math.PI);
-            this.ctx.fill();
-        } else {
-            this.ctx.fillRect(dx, dy, dWidth, dHeight);
-        }
+        const isCircular = htmlEl.classList.contains('handle-grip') || htmlEl.classList.contains('nav-button') || (htmlEl.tagName === 'BUTTON' && !!htmlEl.closest('.ui-block'));
         
-        const borderWidth = parseFloat(getComputedStyle(htmlEl).borderWidth);
+        this.ctx.beginPath();
+        if (isCircular) {
+            this.ctx.arc(dx + dWidth / 2, dy + dHeight / 2, dWidth / 2, 0, 2 * Math.PI);
+        } else {
+            const borderRadius = parseFloat(styles.borderRadius) * zoom;
+            this.ctx.roundRect(dx, dy, dWidth, dHeight, borderRadius);
+        }
+        this.ctx.fill();
+        
+        const borderWidth = parseFloat(styles.borderWidth);
         if (borderWidth > 0) {
-            this.ctx.strokeStyle = getComputedStyle(htmlEl).borderColor;
+            this.ctx.strokeStyle = styles.borderColor;
             this.ctx.lineWidth = borderWidth * zoom;
-            if (htmlEl.classList.contains('handle-grip') || htmlEl.tagName === 'BUTTON' || htmlEl.classList.contains('nav-button')) {
-                this.ctx.stroke();
-            } else {
-                this.ctx.strokeRect(dx, dy, dWidth, dHeight);
-            }
+            this.ctx.stroke();
         }
 
-        // Draw icon
+        // Draw icon or text
         const svgEl = htmlEl.querySelector('svg');
         const after = getComputedStyle(htmlEl, '::after');
 
         if (svgEl) {
-            const color = getComputedStyle(htmlEl).color;
+            const color = styles.color;
             const svgString = svgEl.outerHTML.replace(/currentColor/g, color);
             
             let cachedImage = this.iconCache.get(svgString);
@@ -263,6 +267,15 @@ export class MagnifierPlugin implements Plugin {
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
             this.ctx.fillText(text, dx + dWidth / 2, dy + dHeight / 2);
+        } else if (htmlEl.tagName === 'BUTTON' && htmlEl.innerText) {
+            const baseFontSize = parseFloat(styles.fontSize);
+            const magnifiedFontSize = baseFontSize * zoom;
+
+            this.ctx.font = `${magnifiedFontSize}px ${styles.fontFamily}`;
+            this.ctx.fillStyle = styles.color;
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillText(htmlEl.innerText, dx + dWidth / 2, dy + dHeight / 2);
         }
 
         this.ctx.restore();
