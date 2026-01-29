@@ -1,51 +1,44 @@
 import { ComparisonSlider } from '../core/ComparisonSlider'
+import { EventEmitter } from '../core/EventEmitter'
 import { UIConfig } from '../config'
 
 export class SavePlugin {
   private readonly slider: ComparisonSlider
-  private saveButton!: HTMLButtonElement
 
-  constructor(slider: ComparisonSlider, _config: UIConfig) {
+  constructor(slider: ComparisonSlider, _config: UIConfig, _events: EventEmitter) {
     this.slider = slider
   }
 
   public initialize() {
-    this.saveButton = this.slider.container.querySelector('#saveButton')!
-    this.bindEvents()
+    const saveButton = this.slider.container.querySelector('#saveButton')
+    if (saveButton) {
+      saveButton.addEventListener('click', () => this.saveImage())
+    }
   }
 
-  private bindEvents() {
-    this.saveButton.addEventListener('click', () => this.download())
-  }
-
-  private download() {
+  private saveImage() {
+    const { originalImage, filterEngine } = this.slider
     const tempCanvas = document.createElement('canvas')
     const tempCtx = tempCanvas.getContext('2d')!
-    const originalImage = this.slider.originalImage
-    const filteredCanvas = this.slider.filterEngine.filteredCanvas
 
     tempCanvas.width = originalImage.naturalWidth
     tempCanvas.height = originalImage.naturalHeight
-    tempCtx.filter = filteredCanvas.style.filter
-    tempCtx.drawImage(originalImage, 0, 0)
 
-    const link = document.createElement('a')
-    const originalFileName = originalImage.src.split('/').pop()?.split('.')[0] || 'image'
-    const currentFilterName = this.getCurrentFilterName() || 'original'
-    link.download = `${originalFileName}-${currentFilterName}.png`
-
-    link.href = tempCanvas.toDataURL('image/png')
-    link.click()
-  }
-
-  private getCurrentFilterName(): string | null {
-    const activeFilterButton = this.slider.container.querySelector('.filter-buttons button.active') as HTMLButtonElement
-
-    if (activeFilterButton) {
-      return activeFilterButton.textContent.toLowerCase()
-        .replace(/\s/g, '-')
+    const currentFilter = filterEngine.filteredCanvas.style.filter
+    if (currentFilter) {
+      tempCtx.filter = currentFilter
     }
 
-    return null
+    tempCtx.drawImage(originalImage, 0, 0, originalImage.naturalWidth, originalImage.naturalHeight)
+
+    const originalFileName = originalImage.src.split('/').pop()?.split('.').slice(0, -1).join('.') || 'image'
+    const activeFilterButton = this.slider.container.querySelector('.filter-buttons button.active') as HTMLElement
+    const filterName = activeFilterButton ? activeFilterButton.innerText.toLowerCase().replace(/\s+/g, '-') : 'filtered'
+    const finalFileName = `${originalFileName}-${filterName}.png`
+
+    const link = document.createElement('a')
+    link.download = finalFileName
+    link.href = tempCanvas.toDataURL('image/png')
+    link.click()
   }
 }

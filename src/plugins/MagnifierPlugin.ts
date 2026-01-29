@@ -1,30 +1,43 @@
 import { ComparisonSlider, Plugin } from '../core/ComparisonSlider'
 import { UIConfig } from '../config'
+import { EventEmitter } from '../core/EventEmitter'
 
 export class MagnifierPlugin implements Plugin {
   private slider: ComparisonSlider
+  private events: EventEmitter
   private config: UIConfig
+
+  private magnifierButton!: HTMLElement
   private magnifierEl!: HTMLElement
+  private zoomPanel!: HTMLElement
+
   private magnifierCanvas!: HTMLCanvasElement
   private ctx!: CanvasRenderingContext2D
+
   private isEnabled = false
   private lastMousePosition: { x: number; y: number } | null = null
   private iconCache = new Map<string, HTMLImageElement>()
-  private zoomPanel!: HTMLElement
   private currentZoom: number
-  private magnifierButton!: HTMLElement
 
-  constructor(slider: ComparisonSlider, config: UIConfig) {
+  constructor(
+    slider: ComparisonSlider,
+    config: UIConfig,
+    events: EventEmitter
+  ) {
     this.slider = slider
     this.config = config
+    this.events = events
     this.currentZoom = config.magnifier.defaultZoom
   }
 
   public initialize(): void {
     this.magnifierButton = this.slider.container.querySelector(this.config.magnifier.button)!
+
     this.createMagnifierElement()
     this.createZoomPanel()
     this.attachEventListeners()
+
+    this.events.on('frameUpdate', this.onFrameUpdate.bind(this))
   }
 
   public onFrameUpdate(): void {
@@ -36,13 +49,17 @@ export class MagnifierPlugin implements Plugin {
   private createMagnifierElement(): void {
     this.magnifierEl = document.createElement('div')
     this.magnifierEl.classList.add('magnifier')
+
     const size = this.config.magnifier.size
+
     this.magnifierEl.style.width = `${size}px`
     this.magnifierEl.style.height = `${size}px`
 
     this.magnifierCanvas = document.createElement('canvas')
+
     this.magnifierCanvas.width = size
     this.magnifierCanvas.height = size
+
     this.ctx = this.magnifierCanvas.getContext('2d')!
 
     this.magnifierEl.appendChild(this.magnifierCanvas)
@@ -184,6 +201,7 @@ export class MagnifierPlugin implements Plugin {
 
   private onMouseEnter(e: MouseEvent): void {
     const rect = this.slider.container.getBoundingClientRect()
+
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
 
@@ -192,6 +210,7 @@ export class MagnifierPlugin implements Plugin {
 
   private onMouseMove(e: MouseEvent): void {
     const rect = this.slider.container.getBoundingClientRect()
+
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
 
@@ -236,26 +255,26 @@ export class MagnifierPlugin implements Plugin {
     const clientRadius = parseFloat(getComputedStyle(coveredEl).borderRadius)
 
     if (clientRadius > 0) {
-        const path = new Path2D();
-        const clientWidth = this.slider.container.clientWidth
-        const clientHeight = this.slider.container.clientHeight
-        const zoomedRadius = clientRadius * zoom
+      const path = new Path2D()
+      const clientWidth = this.slider.container.clientWidth
+      const clientHeight = this.slider.container.clientHeight
+      const zoomedRadius = clientRadius * zoom
 
-        const transformX = (c_x: number) => (c_x - x) * zoom + radius
-        const transformY = (c_y: number) => (c_y - y) * zoom + radius
+      const transformX = (c_x: number) => (c_x - x) * zoom + radius
+      const transformY = (c_y: number) => (c_y - y) * zoom + radius
 
-        path.moveTo(transformX(clientRadius), transformY(0))
-        path.lineTo(transformX(clientWidth - clientRadius), transformY(0))
-        path.arcTo(transformX(clientWidth), transformY(0), transformX(clientWidth), transformY(clientRadius), zoomedRadius)
-        path.lineTo(transformX(clientWidth), transformY(clientHeight - clientRadius))
-        path.arcTo(transformX(clientWidth), transformY(clientHeight), transformX(clientWidth - clientRadius), transformY(clientHeight), zoomedRadius)
-        path.lineTo(transformX(clientRadius), transformY(clientHeight))
-        path.arcTo(transformX(0), transformY(clientHeight), transformX(0), transformY(clientHeight - clientRadius), zoomedRadius)
-        path.lineTo(transformX(0), transformY(clientRadius))
-        path.arcTo(transformX(0), transformY(0), transformX(clientRadius), transformY(0), zoomedRadius)
-        path.closePath()
+      path.moveTo(transformX(clientRadius), transformY(0))
+      path.lineTo(transformX(clientWidth - clientRadius), transformY(0))
+      path.arcTo(transformX(clientWidth), transformY(0), transformX(clientWidth), transformY(clientRadius), zoomedRadius)
+      path.lineTo(transformX(clientWidth), transformY(clientHeight - clientRadius))
+      path.arcTo(transformX(clientWidth), transformY(clientHeight), transformX(clientWidth - clientRadius), transformY(clientHeight), zoomedRadius)
+      path.lineTo(transformX(clientRadius), transformY(clientHeight))
+      path.arcTo(transformX(0), transformY(clientHeight), transformX(0), transformY(clientHeight - clientRadius), zoomedRadius)
+      path.lineTo(transformX(0), transformY(clientRadius))
+      path.arcTo(transformX(0), transformY(0), transformX(clientRadius), transformY(0), zoomedRadius)
+      path.closePath()
 
-        this.ctx.clip(path)
+      this.ctx.clip(path)
     }
 
     // 1. Draw original image
@@ -281,9 +300,9 @@ export class MagnifierPlugin implements Plugin {
 
     this.ctx.beginPath()
     if (direction === 'horizontal') {
-        this.ctx.rect(0, 0, magnifierHandlePosition, size)
+      this.ctx.rect(0, 0, magnifierHandlePosition, size)
     } else {
-        this.ctx.rect(0, 0, size, magnifierHandlePosition)
+      this.ctx.rect(0, 0, size, magnifierHandlePosition)
     }
     this.ctx.clip()
     this.ctx.drawImage(originalCanvas, sx, sy, sw, sh, 0, 0, size, size)
@@ -308,13 +327,13 @@ export class MagnifierPlugin implements Plugin {
       const styles = getComputedStyle(htmlEl)
 
       if (htmlEl.id === 'filterPanel' && !htmlEl.classList.contains('open')) {
-          return
+        return
       }
 
       const rect = htmlEl.getBoundingClientRect()
 
       if (rect.width === 0 || rect.height === 0 || styles.display === 'none' || styles.opacity === '0') {
-          return
+        return
       }
 
       const elX = rect.left - containerRect.left

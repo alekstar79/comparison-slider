@@ -1,50 +1,35 @@
 import { ComparisonSlider } from '../core/ComparisonSlider'
+import { EventEmitter } from '../core/EventEmitter'
 import { UIConfig } from '../config'
 
 export class FullscreenPlugin {
   private readonly slider: ComparisonSlider
-  private readonly config: UIConfig
-  private fullscreenButton!: HTMLButtonElement
+  private button!: HTMLElement
 
-  constructor(slider: ComparisonSlider, config: UIConfig) {
+  constructor(slider: ComparisonSlider, _config: UIConfig, _events: EventEmitter) {
     this.slider = slider
-    this.config = config
   }
 
   public initialize() {
-    const fullscreenButtonBlock = this.config.uiBlocks.find(block => block.id === 'featuresButtons')
-    if (!fullscreenButtonBlock) return
+    this.button = this.slider.container.querySelector('#fullscreenButton')!
+    if (!this.button) return
 
-    const fullscreenButtonConfig = fullscreenButtonBlock.buttons.find(button => button.id === 'fullscreenButton')
-    if (!fullscreenButtonConfig) return
-
-    this.fullscreenButton = this.slider.container.querySelector('#fullscreenButton')!
-    if (!this.fullscreenButton) return
-
-    this.fullscreenButton.innerHTML = fullscreenButtonConfig.iconSvg || ''
-    this.bindEvents()
-  }
-
-  private bindEvents() {
-    this.fullscreenButton.addEventListener('click', () => this.toggleFullscreen())
+    this.button.addEventListener('click', () => this.toggleFullscreen())
     document.addEventListener('fullscreenchange', () => this.onFullscreenChange())
   }
 
   private async toggleFullscreen() {
     if (!document.fullscreenElement) {
-      await this.slider.container.requestFullscreen()
+      this.slider.container.requestFullscreen().catch(err => {
+        alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`)
+      })
     } else {
-      if (document.exitFullscreen) {
-        await document.exitFullscreen()
-      }
+      await document.exitFullscreen()
     }
   }
 
   private onFullscreenChange() {
-    if (!document.fullscreenElement) {
-      this.slider.container.classList.remove('fullscreen')
-    } else {
-      this.slider.container.classList.add('fullscreen')
-    }
+    const isFullscreen = !!document.fullscreenElement
+    this.slider.container.classList.toggle('fullscreen', isFullscreen)
   }
 }

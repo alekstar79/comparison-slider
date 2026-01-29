@@ -1,5 +1,7 @@
 import { Plugin } from './core/ComparisonSlider'
 
+import { EventEmitter } from './core/EventEmitter'
+
 import { FilterPlugin } from './plugins/FilterPlugin'
 import { FullscreenPlugin } from './plugins/FullscreenPlugin'
 import { ImagePanPlugin } from './plugins/ImagePanPlugin'
@@ -31,7 +33,7 @@ export interface UIBlock {
 }
 
 export interface UIConfig {
-  plugins: { new (slider: any, config: UIConfig): Plugin }[];
+  plugins: { new (slider: any, config: UIConfig, events: EventEmitter): Plugin }[];
   uiBlocks: UIBlock[];
   magnifier: {
     button: string;

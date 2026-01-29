@@ -149,11 +149,11 @@ export class FilterEngine {
       sHeight = naturalHeight
       sWidth = sHeight * containerRatio
       sx = (naturalWidth - sWidth) / 2 + this.panOffset.x
-      sy = 0 + this.panOffset.y
+      sy = this.panOffset.y
     } else {
       sWidth = naturalWidth
       sHeight = sWidth / containerRatio
-      sx = 0 + this.panOffset.x
+      sx = this.panOffset.x
       sy = (naturalHeight - sHeight) / 2 + this.panOffset.y
     }
 

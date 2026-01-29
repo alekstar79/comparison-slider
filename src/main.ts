@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize plugins from the configuration
     defaultConfig.plugins.forEach(PluginClass => {
-      slider.addPlugin(new PluginClass(slider, defaultConfig))
+      slider.addPlugin(new PluginClass(slider, defaultConfig, slider.events))
     })
   })
 })

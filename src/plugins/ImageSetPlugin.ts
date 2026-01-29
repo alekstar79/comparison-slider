@@ -1,9 +1,12 @@
-import { ComparisonSlider, Plugin } from '../core/ComparisonSlider'
+import { ComparisonSlider } from '../core/ComparisonSlider'
+import { EventEmitter } from '../core/EventEmitter'
 import { UIConfig } from '../config'
 
-export class ImageSetPlugin implements Plugin {
+export class ImageSetPlugin {
   private readonly slider: ComparisonSlider
+  private readonly events: EventEmitter
   private readonly config: UIConfig
+
   private images: HTMLImageElement[] = []
   private currentIndex = 0
   private autoplayTimer: number | null = null
@@ -12,9 +15,14 @@ export class ImageSetPlugin implements Plugin {
   private nextButton!: HTMLButtonElement
   private prevButton!: HTMLButtonElement
 
-  constructor(slider: ComparisonSlider, config: UIConfig) {
+  constructor(
+    slider: ComparisonSlider,
+    config: UIConfig,
+    events: EventEmitter
+  ) {
     this.slider = slider
     this.config = config
+    this.events = events
   }
 
   public async initialize() {
@@ -175,7 +183,7 @@ export class ImageSetPlugin implements Plugin {
           break
       }
 
-      this.slider.notifyFrameUpdate()
+      this.events.emit('frameUpdate')
 
       if (progress < 1) {
         requestAnimationFrame(animate)

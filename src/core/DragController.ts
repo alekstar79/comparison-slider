@@ -1,12 +1,12 @@
 export class DragController {
-  private readonly boundary: HTMLElement
-  private readonly handleGrip: HTMLElement
-  public readonly handleLine: HTMLElement
   private readonly filteredCanvas: HTMLCanvasElement
   private readonly direction: 'horizontal' | 'vertical'
+  private readonly boundary: HTMLElement
+  private readonly handleGrip: HTMLElement
+  private readonly handleLine: HTMLElement
 
-  private isDragging = false
   private animationFrameId: number | null = null
+  private isDragging = false
 
   public posX = 200
   public posY = 100

@@ -1,4 +1,5 @@
 import { ComparisonSlider } from '../core/ComparisonSlider'
+import { EventEmitter } from '../core/EventEmitter'
 import { UIConfig } from '../config'
 
 export class FilterPlugin {
@@ -7,7 +8,7 @@ export class FilterPlugin {
   private filterButtons!: HTMLButtonElement[]
   private readonly slider: ComparisonSlider
 
-  constructor(slider: ComparisonSlider, _config: UIConfig) {
+  constructor(slider: ComparisonSlider, _config: UIConfig, _events: EventEmitter) {
     this.slider = slider
   }
 

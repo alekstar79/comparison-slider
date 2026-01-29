@@ -1,29 +1,22 @@
-import { ImageSetPlugin } from '../plugins/ImageSetPlugin'
-import { MagnifierPlugin } from '../plugins/MagnifierPlugin'
-import { ImagePanPlugin } from '../plugins/ImagePanPlugin'
 import { SliderHtmlBuilder } from './SliderHtmlBuilder'
 import { DragController } from './DragController'
 import { FilterEngine } from './FilterEngine'
+import { EventEmitter } from './EventEmitter'
 import { UIConfig } from '../config'
 
 export interface Plugin {
   initialize(): void;
-  onFrameUpdate?: () => void;
-  onImageUpdate?: () => void;
-  onResize?: () => void;
+  destroy?: () => void;
 }
 
 export class ComparisonSlider {
+  public readonly events = new EventEmitter()
   public originalImage: HTMLImageElement
   public container!: HTMLElement
 
   public filterEngine!: FilterEngine
   public dragController!: DragController
   public resizeObserver!: ResizeObserver
-
-  public imageSetPlugin?: ImageSetPlugin
-  public magnifierPlugin?: MagnifierPlugin
-  public imagePanPlugin?: ImagePanPlugin
 
   public readonly plugins: Plugin[] = []
   public readonly config: UIConfig
@@ -37,16 +30,6 @@ export class ComparisonSlider {
 
   public addPlugin(plugin: Plugin) {
     this.plugins.push(plugin)
-
-    if (plugin instanceof ImageSetPlugin) {
-      this.imageSetPlugin = plugin
-    }
-    if (plugin instanceof MagnifierPlugin) {
-      this.magnifierPlugin = plugin
-    }
-    if (plugin instanceof ImagePanPlugin) {
-      this.imagePanPlugin = plugin
-    }
   }
 
   public async updateImage(newImage: HTMLImageElement | string, reset = true) {
@@ -62,13 +45,7 @@ export class ComparisonSlider {
       this.resetPosition()
     }
 
-    this.plugins.forEach(p => p.onImageUpdate && p.onImageUpdate())
-  }
-
-  public notifyFrameUpdate() {
-    if (this.magnifierPlugin?.onFrameUpdate) {
-      this.magnifierPlugin.onFrameUpdate()
-    }
+    this.events.emit('imageUpdate', { image: this.originalImage })
   }
 
   private async init()
@@ -117,7 +94,7 @@ export class ComparisonSlider {
     this.resizeObserver = new ResizeObserver(() => {
       this.filterEngine.redraw()
       this.resetPosition()
-      this.plugins.forEach(p => p.onResize && p.onResize())
+      this.events.emit('resize')
     })
 
     this.resizeObserver.observe(this.container)
@@ -128,6 +105,7 @@ export class ComparisonSlider {
 
     const initX = parseInt(covered.dataset.initX || '0', 10)
     const initY = parseInt(covered.dataset.initY || '0', 10)
+
     const newX = (initX / this.originalImage.naturalWidth) * covered.clientWidth
     const newY = (initY / this.originalImage.naturalHeight) * covered.clientHeight
 

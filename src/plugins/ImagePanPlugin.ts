@@ -1,8 +1,10 @@
 import { ComparisonSlider, Plugin } from '../core/ComparisonSlider'
+import { EventEmitter } from '../core/EventEmitter'
 import { UIConfig } from '../config'
 
 export class ImagePanPlugin implements Plugin {
   private slider: ComparisonSlider
+  private events: EventEmitter
   private config: UIConfig
 
   private startPanPosition = { x: 0, y: 0 }
@@ -11,22 +13,21 @@ export class ImagePanPlugin implements Plugin {
   private isPannable = false
   private isPanning = false
 
-  constructor(slider: ComparisonSlider, config: UIConfig) {
+  constructor(
+    slider: ComparisonSlider,
+    config: UIConfig,
+    events: EventEmitter
+  ) {
     this.slider = slider
     this.config = config
+    this.events = events
   }
 
   public initialize(): void {
     this.checkPannable()
     this.attachEventListeners()
-  }
-
-  public onImageUpdate(): void {
-    this.checkPannable()
-  }
-
-  public onResize(): void {
-    this.checkPannable()
+    this.events.on('imageUpdate', this.checkPannable.bind(this))
+    this.events.on('resize', this.checkPannable.bind(this))
   }
 
   private checkPannable(): void {
@@ -53,7 +54,6 @@ export class ImagePanPlugin implements Plugin {
     if (!this.isPannable || !isCanvas) return
 
     e.preventDefault()
-
     target.setPointerCapture(e.pointerId)
 
     this.isPanning = true

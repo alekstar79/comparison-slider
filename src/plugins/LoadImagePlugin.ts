@@ -1,59 +1,54 @@
 import { ComparisonSlider } from '../core/ComparisonSlider'
+import { EventEmitter } from '../core/EventEmitter'
 import { UIConfig } from '../config'
 
 export class LoadImagePlugin {
+  private readonly fileInput: HTMLInputElement
   private readonly slider: ComparisonSlider
-  private readonly config: UIConfig
-  private uploadButton!: HTMLButtonElement
-  private fileInput!: HTMLInputElement
 
-  constructor(slider: ComparisonSlider, config: UIConfig) {
+  constructor(slider: ComparisonSlider, _config: UIConfig, _events: EventEmitter) {
+    this.fileInput = this.createFileInput()
     this.slider = slider
-    this.config = config
   }
 
   public initialize() {
-    if (this.slider.originalImage.dataset.imgset === undefined) return
+    const uploadButton = this.slider.container.querySelector('#uploadButton')
 
-    const uploadButtonBlock = this.config.uiBlocks.find(block => block.id === 'actionButtons')
-    if (!uploadButtonBlock) return
-
-    const uploadButtonConfig = uploadButtonBlock.buttons.find(button => button.id === 'uploadButton')
-    if (!uploadButtonConfig) return
-
-    this.uploadButton = this.slider.container.querySelector('#uploadButton')!
-    if (!this.uploadButton) return
-
-    this.createFileInput()
-    this.bindEvents()
+    if (uploadButton) {
+      uploadButton.addEventListener('click', () => {
+        this.fileInput.click()
+      })
+    }
   }
 
-  private createFileInput() {
-    this.fileInput = document.createElement('input')
-    this.fileInput.type = 'file'
-    this.fileInput.accept = 'image/*'
-    this.fileInput.style.display = 'none'
-    this.fileInput.multiple = true
-    this.slider.container.appendChild(this.fileInput)
+  private createFileInput(): HTMLInputElement {
+    const input = document.createElement('input')
+
+    input.type = 'file'
+    input.accept = 'image/*'
+    input.style.display = 'none'
+    input.addEventListener('change', (event) => {
+      this.onFileSelect(event)
+    })
+
+    document.body.appendChild(input)
+
+    return input
   }
 
-  private bindEvents() {
-    this.uploadButton.addEventListener('click', () => this.fileInput.click())
-    this.fileInput.addEventListener('change', (event) => this.handleFileSelect(event))
-  }
+  private onFileSelect(event: Event) {
+    const input = event.target as HTMLInputElement
 
-  private async handleFileSelect(event: Event) {
-    const target = event.target as HTMLInputElement
-    const files = target.files
+    if (input.files && input.files[0]) {
+      const reader = new FileReader()
 
-    if (files && files.length > 0) {
-      const dataUrls = Array.from(files).map(file => URL.createObjectURL(file))
-
-      if (this.slider.imageSetPlugin) {
-        await this.slider.imageSetPlugin.addImages(dataUrls)
-      } else {
-        await this.slider.updateImage(dataUrls[0])
+      reader.onload = async (e) => {
+        if (e.target?.result) {
+          await this.slider.updateImage(e.target.result as string)
+        }
       }
+
+      reader.readAsDataURL(input.files[0])
     }
   }
 }
