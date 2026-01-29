@@ -46,6 +46,7 @@ export class MagnifierPlugin implements Plugin {
 
     this.slider.container.addEventListener('mousemove', (e) => this.onMouseMove(e))
     this.slider.container.addEventListener('mouseleave', () => this.onMouseLeave())
+    this.slider.container.addEventListener('mouseenter', (e) => this.onMouseEnter(e))
   }
 
   private toggle(): void {
@@ -69,6 +70,13 @@ export class MagnifierPlugin implements Plugin {
   private hide(): void {
     this.magnifierEl.style.display = 'none'
   }
+  
+  private onMouseEnter(e: MouseEvent): void {
+    const rect = this.slider.container.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    this.lastMousePosition = { x, y }
+  }
 
   private onMouseMove(e: MouseEvent): void {
     const rect = this.slider.container.getBoundingClientRect()
@@ -84,7 +92,9 @@ export class MagnifierPlugin implements Plugin {
 
   private onMouseLeave(): void {
     this.lastMousePosition = null
-    this.hide()
+    if (this.isEnabled) {
+        this.hide()
+    }
   }
 
   private update(x: number, y: number): void {
@@ -105,6 +115,33 @@ export class MagnifierPlugin implements Plugin {
     const sh = size / zoom
 
     this.ctx.clearRect(0, 0, size, size)
+    
+    this.ctx.save()
+
+    const coveredEl = this.slider.container.querySelector('.covered') as HTMLElement;
+    const clientRadius = parseFloat(getComputedStyle(coveredEl).borderRadius);
+    
+    if (clientRadius > 0) {
+        const path = new Path2D();
+        const clientWidth = this.slider.container.clientWidth;
+        const clientHeight = this.slider.container.clientHeight;
+        const zoomedRadius = clientRadius * zoom;
+
+        const transformX = (c_x: number) => (c_x - x) * zoom + radius;
+        const transformY = (c_y: number) => (c_y - y) * zoom + radius;
+
+        path.moveTo(transformX(clientRadius), transformY(0));
+        path.lineTo(transformX(clientWidth - clientRadius), transformY(0));
+        path.arcTo(transformX(clientWidth), transformY(0), transformX(clientWidth), transformY(clientRadius), zoomedRadius);
+        path.lineTo(transformX(clientWidth), transformY(clientHeight - clientRadius));
+        path.arcTo(transformX(clientWidth), transformY(clientHeight), transformX(clientWidth - clientRadius), transformY(clientHeight), zoomedRadius);
+        path.lineTo(transformX(clientRadius), transformY(clientHeight));
+        path.arcTo(transformX(0), transformY(clientHeight), transformX(0), transformY(clientHeight - clientRadius), zoomedRadius);
+        path.lineTo(transformX(0), transformY(clientRadius));
+        path.arcTo(transformX(0), transformY(0), transformX(clientRadius), transformY(0), zoomedRadius);
+        path.closePath();
+        this.ctx.clip(path);
+    }
 
     // 1. Draw original image
     this.ctx.drawImage(originalCanvas, sx, sy, sw, sh, 0, 0, size, size)
@@ -112,7 +149,7 @@ export class MagnifierPlugin implements Plugin {
     // 2. Calculate clipping region for the filtered part
     const handleX = this.slider.dragController.posX
     const handleY = this.slider.dragController.posY
-    const direction = this.slider.container.querySelector('.covered')?.dataset.direction as 'horizontal' | 'vertical'
+    const direction = coveredEl.dataset.direction as 'horizontal' | 'vertical'
     
     const handlePosition = direction === 'horizontal' ? handleX : handleY;
     const cursorPosition = direction === 'horizontal' ? x : y;
@@ -133,6 +170,8 @@ export class MagnifierPlugin implements Plugin {
 
     // 4. Draw UI elements
     this.drawUIElements(x, y)
+
+    this.ctx.restore()
   }
 
   private drawUIElements(mouseX: number, mouseY: number): void {
