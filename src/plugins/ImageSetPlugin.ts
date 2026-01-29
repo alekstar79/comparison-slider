@@ -1,7 +1,7 @@
-import { ComparisonSlider } from '../core/ComparisonSlider'
+import { ComparisonSlider, Plugin } from '../core/ComparisonSlider'
 import { UIConfig } from '../config'
 
-export class ImageSetPlugin {
+export class ImageSetPlugin implements Plugin {
   private readonly slider: ComparisonSlider
   private readonly config: UIConfig
   private images: HTMLImageElement[] = []
@@ -148,6 +148,7 @@ export class ImageSetPlugin {
     const fromImg = this.images[this.currentIndex]
     const toImg = this.images[newIndex]
     const duration = 400
+
     let startTime: number | null = null
 
     const animate = (timestamp: number) => {
@@ -173,6 +174,8 @@ export class ImageSetPlugin {
           this.slider.filterEngine.renderSlideTransition(fromImg, toImg, progress, direction)
           break
       }
+
+      this.slider.notifyFrameUpdate()
 
       if (progress < 1) {
         requestAnimationFrame(animate)

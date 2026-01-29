@@ -1,4 +1,5 @@
 import { ImageSetPlugin } from '../plugins/ImageSetPlugin'
+import { MagnifierPlugin } from '../plugins/MagnifierPlugin'
 import { SliderHtmlBuilder } from './SliderHtmlBuilder'
 import { DragController } from './DragController'
 import { FilterEngine } from './FilterEngine'
@@ -6,15 +7,20 @@ import { UIConfig } from '../config'
 
 export interface Plugin {
   initialize(): void;
+  onFrameUpdate?: () => void;
 }
 
 export class ComparisonSlider {
   public originalImage: HTMLImageElement
   public container!: HTMLElement
+
   public filterEngine!: FilterEngine
   public dragController!: DragController
   public resizeObserver!: ResizeObserver
+
   public imageSetPlugin?: ImageSetPlugin
+  public magnifierPlugin?: MagnifierPlugin
+
   public readonly plugins: Plugin[] = []
   public readonly config: UIConfig
 
@@ -27,8 +33,12 @@ export class ComparisonSlider {
 
   public addPlugin(plugin: Plugin) {
     this.plugins.push(plugin)
+
     if (plugin instanceof ImageSetPlugin) {
       this.imageSetPlugin = plugin
+    }
+    if (plugin instanceof MagnifierPlugin) {
+      this.magnifierPlugin = plugin
     }
   }
 
@@ -46,9 +56,16 @@ export class ComparisonSlider {
     }
   }
 
+  public notifyFrameUpdate() {
+    if (this.magnifierPlugin?.onFrameUpdate) {
+      this.magnifierPlugin.onFrameUpdate()
+    }
+  }
+
   private async init()
   {
     const imgSetAttr = this.originalImage.dataset.imgset
+
     if (imgSetAttr && imgSetAttr.length > 0) {
       const images = imgSetAttr.split(',').map(s => s.trim())
       if (images.length > 0 && images[0]) {

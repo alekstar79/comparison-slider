@@ -27,6 +27,12 @@ export class MagnifierPlugin implements Plugin {
     this.attachEventListeners()
   }
 
+  public onFrameUpdate(): void {
+    if (this.isEnabled && this.lastMousePosition) {
+      this.update(this.lastMousePosition.x, this.lastMousePosition.y)
+    }
+  }
+
   private createMagnifierElement(): void {
     this.magnifierEl = document.createElement('div')
     this.magnifierEl.classList.add('magnifier')
@@ -180,6 +186,7 @@ export class MagnifierPlugin implements Plugin {
     const rect = this.slider.container.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
+
     this.lastMousePosition = { x, y }
   }
 
@@ -187,6 +194,7 @@ export class MagnifierPlugin implements Plugin {
     const rect = this.slider.container.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
+
     this.lastMousePosition = { x, y }
 
     if (this.isEnabled) {
@@ -197,6 +205,7 @@ export class MagnifierPlugin implements Plugin {
 
   private onMouseLeave(): void {
     this.lastMousePosition = null
+
     if (this.isEnabled) {
         this.hide()
     }
@@ -210,7 +219,7 @@ export class MagnifierPlugin implements Plugin {
   }
 
   private updateMagnifierContent(x: number, y: number): void {
-    const { originalCanvas, filteredCanvas } = this.slider.filterEngine
+    const { originalCanvas /*, filteredCanvas */ } = this.slider.filterEngine
     const { size } = this.config.magnifier
     const zoom = this.currentZoom
     const radius = size / 2
@@ -227,26 +236,26 @@ export class MagnifierPlugin implements Plugin {
     const clientRadius = parseFloat(getComputedStyle(coveredEl).borderRadius)
 
     if (clientRadius > 0) {
-      const path = new Path2D()
-      const clientWidth = this.slider.container.clientWidth
-      const clientHeight = this.slider.container.clientHeight
-      const zoomedRadius = clientRadius * zoom
+        const path = new Path2D();
+        const clientWidth = this.slider.container.clientWidth
+        const clientHeight = this.slider.container.clientHeight
+        const zoomedRadius = clientRadius * zoom
 
-      const transformX = (c_x: number) => (c_x - x) * zoom + radius
-      const transformY = (c_y: number) => (c_y - y) * zoom + radius
+        const transformX = (c_x: number) => (c_x - x) * zoom + radius
+        const transformY = (c_y: number) => (c_y - y) * zoom + radius
 
-      path.moveTo(transformX(clientRadius), transformY(0))
-      path.lineTo(transformX(clientWidth - clientRadius), transformY(0))
-      path.arcTo(transformX(clientWidth), transformY(0), transformX(clientWidth), transformY(clientRadius), zoomedRadius)
-      path.lineTo(transformX(clientWidth), transformY(clientHeight - clientRadius))
-      path.arcTo(transformX(clientWidth), transformY(clientHeight), transformX(clientWidth - clientRadius), transformY(clientHeight), zoomedRadius)
-      path.lineTo(transformX(clientRadius), transformY(clientHeight))
-      path.arcTo(transformX(0), transformY(clientHeight), transformX(0), transformY(clientHeight - clientRadius), zoomedRadius)
-      path.lineTo(transformX(0), transformY(clientRadius))
-      path.arcTo(transformX(0), transformY(0), transformX(clientRadius), transformY(0), zoomedRadius)
-      path.closePath()
+        path.moveTo(transformX(clientRadius), transformY(0))
+        path.lineTo(transformX(clientWidth - clientRadius), transformY(0))
+        path.arcTo(transformX(clientWidth), transformY(0), transformX(clientWidth), transformY(clientRadius), zoomedRadius)
+        path.lineTo(transformX(clientWidth), transformY(clientHeight - clientRadius))
+        path.arcTo(transformX(clientWidth), transformY(clientHeight), transformX(clientWidth - clientRadius), transformY(clientHeight), zoomedRadius)
+        path.lineTo(transformX(clientRadius), transformY(clientHeight))
+        path.arcTo(transformX(0), transformY(clientHeight), transformX(0), transformY(clientHeight - clientRadius), zoomedRadius)
+        path.lineTo(transformX(0), transformY(clientRadius))
+        path.arcTo(transformX(0), transformY(0), transformX(clientRadius), transformY(0), zoomedRadius)
+        path.closePath()
 
-      this.ctx.clip(path)
+        this.ctx.clip(path)
     }
 
     // 1. Draw original image
@@ -299,13 +308,13 @@ export class MagnifierPlugin implements Plugin {
       const styles = getComputedStyle(htmlEl)
 
       if (htmlEl.id === 'filterPanel' && !htmlEl.classList.contains('open')) {
-        return
+          return
       }
 
       const rect = htmlEl.getBoundingClientRect()
 
       if (rect.width === 0 || rect.height === 0 || styles.display === 'none' || styles.opacity === '0') {
-        return
+          return
       }
 
       const elX = rect.left - containerRect.left
