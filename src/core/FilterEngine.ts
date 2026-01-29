@@ -11,6 +11,7 @@ export class FilterEngine {
   public readonly originalCtx: CanvasRenderingContext2D
   public readonly filteredCtx: CanvasRenderingContext2D
   public pixelCoordinates: { x: number, y: number }[] | null = null
+  public panOffset = { x: 0, y: 0 }
 
   constructor(
     originalCanvas: HTMLCanvasElement,
@@ -28,11 +29,18 @@ export class FilterEngine {
 
   public updateImage(newImage: HTMLImageElement) {
     this.originalImage = newImage
+    this.panOffset = { x: 0, y: 0 } // Reset pan on new image
     this.redraw()
   }
 
   public applyFilter(filter: string) {
     this.filteredCanvas.style.filter = filter
+  }
+
+  public setPanOffset(x: number, y: number) {
+    this.panOffset.x = x
+    this.panOffset.y = y
+    this.redraw()
   }
 
   public redraw() {
@@ -140,14 +148,18 @@ export class FilterEngine {
     if (imgRatio > containerRatio) {
       sHeight = naturalHeight
       sWidth = sHeight * containerRatio
-      sx = (naturalWidth - sWidth) / 2
-      sy = 0
+      sx = (naturalWidth - sWidth) / 2 + this.panOffset.x
+      sy = 0 + this.panOffset.y
     } else {
       sWidth = naturalWidth
       sHeight = sWidth / containerRatio
-      sx = 0
-      sy = (naturalHeight - sHeight) / 2
+      sx = 0 + this.panOffset.x
+      sy = (naturalHeight - sHeight) / 2 + this.panOffset.y
     }
+
+    // Clamp sx and sy to prevent panning out of bounds
+    sx = Math.max(0, Math.min(sx, naturalWidth - sWidth))
+    sy = Math.max(0, Math.min(sy, naturalHeight - sHeight))
 
     if (clear) ctx.clearRect(0, 0, canvas.width, canvas.height)
 

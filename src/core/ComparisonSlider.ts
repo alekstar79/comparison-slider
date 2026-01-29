@@ -1,5 +1,6 @@
 import { ImageSetPlugin } from '../plugins/ImageSetPlugin'
 import { MagnifierPlugin } from '../plugins/MagnifierPlugin'
+import { ImagePanPlugin } from '../plugins/ImagePanPlugin'
 import { SliderHtmlBuilder } from './SliderHtmlBuilder'
 import { DragController } from './DragController'
 import { FilterEngine } from './FilterEngine'
@@ -8,6 +9,8 @@ import { UIConfig } from '../config'
 export interface Plugin {
   initialize(): void;
   onFrameUpdate?: () => void;
+  onImageUpdate?: () => void;
+  onResize?: () => void;
 }
 
 export class ComparisonSlider {
@@ -20,6 +23,7 @@ export class ComparisonSlider {
 
   public imageSetPlugin?: ImageSetPlugin
   public magnifierPlugin?: MagnifierPlugin
+  public imagePanPlugin?: ImagePanPlugin
 
   public readonly plugins: Plugin[] = []
   public readonly config: UIConfig
@@ -40,6 +44,9 @@ export class ComparisonSlider {
     if (plugin instanceof MagnifierPlugin) {
       this.magnifierPlugin = plugin
     }
+    if (plugin instanceof ImagePanPlugin) {
+      this.imagePanPlugin = plugin
+    }
   }
 
   public async updateImage(newImage: HTMLImageElement | string, reset = true) {
@@ -54,6 +61,8 @@ export class ComparisonSlider {
     if (reset) {
       this.resetPosition()
     }
+
+    this.plugins.forEach(p => p.onImageUpdate && p.onImageUpdate())
   }
 
   public notifyFrameUpdate() {
@@ -108,6 +117,7 @@ export class ComparisonSlider {
     this.resizeObserver = new ResizeObserver(() => {
       this.filterEngine.redraw()
       this.resetPosition()
+      this.plugins.forEach(p => p.onResize && p.onResize())
     })
 
     this.resizeObserver.observe(this.container)

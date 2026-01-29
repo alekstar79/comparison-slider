@@ -4,8 +4,7 @@ import { FILTERS } from '../filters'
 export class SliderHtmlBuilder {
   public static readonly ALL_FILTERS = FILTERS
 
-  static enhanceImage(img: HTMLImageElement, config: UIConfig): HTMLElement
-  {
+  static enhanceImage(img: HTMLImageElement, config: UIConfig): HTMLElement {
     const container = document.createElement('div')
     const direction = (img.dataset.direction as 'horizontal' | 'vertical') || 'horizontal'
     const initX = img.dataset.initX || '25'

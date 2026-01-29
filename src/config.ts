@@ -1,11 +1,12 @@
+import { Plugin } from './core/ComparisonSlider'
+
 import { FilterPlugin } from './plugins/FilterPlugin'
 import { FullscreenPlugin } from './plugins/FullscreenPlugin'
+import { ImagePanPlugin } from './plugins/ImagePanPlugin'
 import { ImageSetPlugin } from './plugins/ImageSetPlugin'
 import { LoadImagePlugin } from './plugins/LoadImagePlugin'
 import { MagnifierPlugin } from './plugins/MagnifierPlugin'
 import { SavePlugin } from './plugins/SavePlugin'
-
-import { Plugin } from './core/ComparisonSlider'
 
 export interface ButtonPosition {
   bottom?: string;
@@ -38,6 +39,9 @@ export interface UIConfig {
     defaultZoom: number;
     zoomLevels: number[];
   };
+  pan?: {
+    allowedRatioDeviation: number;
+  };
   imageSet?: {
     cyclic: boolean;
     autoplay: boolean;
@@ -50,11 +54,12 @@ export interface UIConfig {
 export const defaultConfig: UIConfig = {
   plugins: [
     FilterPlugin,
-    SavePlugin,
     FullscreenPlugin,
-    LoadImagePlugin,
+    ImagePanPlugin,
     ImageSetPlugin,
+    LoadImagePlugin,
     MagnifierPlugin,
+    SavePlugin,
   ],
   uiBlocks: [
     {
@@ -103,6 +108,9 @@ export const defaultConfig: UIConfig = {
     size: 150,
     defaultZoom: 2,
     zoomLevels: [1.5, 2, 3],
+  },
+  pan: {
+    allowedRatioDeviation: 0.1,
   },
   imageSet: {
     cyclic: true,
