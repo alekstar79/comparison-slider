@@ -97,8 +97,8 @@ export class MagnifierPlugin implements Plugin {
   }
 
   private showZoomPanel(): void {
-    this.zoomPanel.classList.add('open')
     this.positionZoomPanel()
+    this.zoomPanel.classList.add('open')
   }
 
   private hideZoomPanel(): void {
@@ -109,17 +109,44 @@ export class MagnifierPlugin implements Plugin {
     const parentBlock = this.magnifierButton.closest('.ui-block') as HTMLElement
     const containerRect = this.slider.container.getBoundingClientRect()
     const buttonRect = this.magnifierButton.getBoundingClientRect()
+
+    const isVertical = parentBlock.classList.contains('vertical')
+    this.zoomPanel.classList.toggle('vertical', !isVertical)
+    this.zoomPanel.classList.toggle('horizontal', isVertical)
+
+    // Temporarily apply display to measure, but keep it invisible
+    this.zoomPanel.style.visibility = 'hidden'
+    this.zoomPanel.style.display = 'flex'
     const panelRect = this.zoomPanel.getBoundingClientRect()
+
+    // Reset temporary styles
+    this.zoomPanel.style.display = ''
+    this.zoomPanel.style.visibility = ''
 
     let top = buttonRect.top - containerRect.top
     let left = buttonRect.left - containerRect.left
 
-    if (parentBlock.classList.contains('vertical')) {
-      left -= panelRect.width
-    } else {
-      top -= panelRect.height
+    if (isVertical) {
+      // Try to position to the right
+      left += buttonRect.width + 10
+      top += (buttonRect.height - panelRect.height) / 2
+
+      // If not enough space on the right, position to the left
+      if (left + panelRect.width > containerRect.width) {
+        left = buttonRect.left - containerRect.left - panelRect.width - 10
+      }
+    } else { // horizontal
+      // Try to position above
+      top -= panelRect.height + 10
+      left += (buttonRect.width - panelRect.width) / 2
+
+      // If not enough space above, position below
+      if (top < 0) {
+        top = buttonRect.top - containerRect.top + buttonRect.height + 10
+      }
     }
 
+    // Final boundary checks
     if (left < 0) left = 0
     if (top < 0) top = 0
     if (left + panelRect.width > containerRect.width) left = containerRect.width - panelRect.width
@@ -134,6 +161,7 @@ export class MagnifierPlugin implements Plugin {
     this.hideZoomPanel()
     this.isEnabled = true
     this.magnifierButton.classList.add('active')
+
     if (this.lastMousePosition) {
       this.show()
       this.update(this.lastMousePosition.x, this.lastMousePosition.y)
@@ -258,7 +286,7 @@ export class MagnifierPlugin implements Plugin {
     const radius = size / 2
     const containerRect = this.slider.container.getBoundingClientRect()
 
-    const elements = this.slider.container.querySelectorAll('.ui-block button, .handle-grip, .handle-line, .nav-button, .ui-panel, .filter-buttons button')
+    const elements = this.slider.container.querySelectorAll('.ui-block button, .handle-grip, .handle-line, .nav-button, .ui-panel, .filter-buttons button');
 
     elements.forEach(el => {
       const htmlEl = el as HTMLElement

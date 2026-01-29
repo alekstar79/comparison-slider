@@ -281,6 +281,15 @@ h2 {
 
 .magnifier-zoom-panel.open {
   display: flex;
+}
+
+.magnifier-zoom-panel.horizontal {
+  flex-direction: row;
+  gap: 5px;
+}
+
+.magnifier-zoom-panel.vertical {
+  flex-direction: column;
   gap: 5px;
 }
 
