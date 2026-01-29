@@ -1,8 +1,8 @@
+import { ImageSetPlugin } from './plugins/ImageSetPlugin'
 import { FilterPlugin } from './plugins/FilterPlugin'
-import { SavePlugin } from './plugins/SavePlugin'
 import { FullscreenPlugin } from './plugins/FullscreenPlugin'
 import { LoadImagePlugin } from './plugins/LoadImagePlugin'
-import { ImageSetPlugin } from './plugins/ImageSetPlugin'
+import { SavePlugin } from './plugins/SavePlugin'
 import { Plugin } from './core/ComparisonSlider'
 
 export interface ButtonPosition {
@@ -80,7 +80,11 @@ export const defaultConfig: UIConfig = {
       buttons: [
         {
           id: 'fullscreenButton',
-          iconSvg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M5 5v5h2V7h3V5H5zm9 0v2h3v3h2V5h-5zm-9 9v5h5v-2H7v-3H5zm9 5v-2h3v-3h2v5h-5z"/></svg>`
+          iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M5 5v5h2V7h3V5H5zm9 0v2h3v3h2V5h-5zm-9 9v5h5v-2H7v-3H5zm9 5v-2h3v-3h2v5h-5z"/></svg>'
+        },
+        {
+          id: 'magnifierButton',
+          iconSvg: 'M'
         }
       ]
     }
