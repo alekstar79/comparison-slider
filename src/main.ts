@@ -6,8 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const slider = new ComparisonSlider(img as HTMLImageElement, defaultConfig)
 
     // Initialize plugins from the configuration
-    defaultConfig.plugins.forEach(PluginClass => {
-      slider.addPlugin(new PluginClass(slider, defaultConfig, slider.events))
+    slider.config.plugins.forEach(PluginClass => {
+      slider.addPlugin(new PluginClass(slider, slider.config, slider.events))
     })
   })
 })

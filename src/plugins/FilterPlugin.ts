@@ -7,9 +7,11 @@ export class FilterPlugin {
   private toggleButton!: HTMLButtonElement
   private filterButtons!: HTMLButtonElement[]
   private readonly slider: ComparisonSlider
+  private readonly events: EventEmitter
 
-  constructor(slider: ComparisonSlider, _config: UIConfig, _events: EventEmitter) {
+  constructor(slider: ComparisonSlider, _config: UIConfig, events: EventEmitter) {
     this.slider = slider
+    this.events = events
   }
 
   public initialize() {
@@ -34,9 +36,12 @@ export class FilterPlugin {
 
   private onFilterClick(event: MouseEvent) {
     const targetButton = event.currentTarget as HTMLButtonElement
-    const filter = targetButton.dataset.filter!
-    this.slider.filterEngine.applyFilter(filter)
+    const filterValue = targetButton.dataset.filter!
+    const filterName = targetButton.textContent || ''
+    
+    this.slider.filterEngine.applyFilter(filterValue)
     this.setActiveButton(targetButton)
+    this.events.emit('filterChange', { name: filterName, value: filterValue })
   }
 
   private setActiveButton(activeButton: HTMLButtonElement) {
@@ -47,8 +52,13 @@ export class FilterPlugin {
 
   private setInitialFilter() {
     if (this.filterButtons.length > 0) {
-      this.setActiveButton(this.filterButtons[0])
-      this.slider.filterEngine.applyFilter(this.filterButtons[0].dataset.filter!)
+      const initialButton = this.filterButtons[0]
+      const filterValue = initialButton.dataset.filter!
+      const filterName = initialButton.textContent || ''
+
+      this.setActiveButton(initialButton)
+      this.slider.filterEngine.applyFilter(filterValue)
+      this.events.emit('filterChange', { name: filterName, value: filterValue })
     }
   }
 }

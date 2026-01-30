@@ -4,6 +4,28 @@ import { FilterEngine } from './FilterEngine'
 import { EventEmitter } from './EventEmitter'
 import { UIConfig } from '../config'
 
+function isObject(item: any): item is Record<string, any> {
+  return (item && typeof item === 'object' && !Array.isArray(item))
+}
+
+/**
+ * A robust parser for data-attribute "objects".
+ * This function is safer than using regex to convert to JSON.
+ * It creates a temporary function to evaluate the object-like string.
+ */
+function parseDataAttribute(value: string): object | null {
+  try {
+    // By wrapping the value in `return` and creating a new Function,
+    // we can safely evaluate the object-like string into a real object.
+    const parser = new Function(`return ${value}`)
+    const result = parser()
+
+    return isObject(result) ? result : null
+  } catch (e) {
+    return null
+  }
+}
+
 export interface Plugin {
   initialize(): void;
   destroy?: () => void;
@@ -24,8 +46,51 @@ export class ComparisonSlider {
   constructor(img: HTMLImageElement, config: UIConfig)
   {
     this.originalImage = img
-    this.config = config
+    this.config = this.buildConfig(config)
     this.init().catch(console.error)
+  }
+
+  private buildConfig(baseConfig: UIConfig): UIConfig {
+    const newConfig = JSON.parse(JSON.stringify(baseConfig))
+    const data = this.originalImage.dataset
+
+    newConfig.plugins = [...baseConfig.plugins]
+
+    // Merge simple data-attributes
+    if (data.hoverToSlide) {
+      newConfig.hoverToSlide = data.hoverToSlide === 'true'
+    }
+    if (data.labelsBefore) {
+      newConfig.labels.before = data.labelsBefore
+    }
+    if (data.labelsAfter) {
+      newConfig.labels.after = data.labelsAfter
+    }
+    if (data.labelsPosition) {
+      newConfig.labels.position = data.labelsPosition as 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+    }
+
+    // Merge uiBlocks data-attributes
+    newConfig.uiBlocks.forEach((block: any) => {
+      const blockIdCamelCase = block.id.replace(/-(\w)/g, (_: string, c: string) => c.toUpperCase())
+
+      // Handle complex object attributes (like 'position')
+      const positionAttributeValue = data[blockIdCamelCase]
+      if (positionAttributeValue) {
+        const parsedConfig = parseDataAttribute(positionAttributeValue)
+        if (isObject(parsedConfig)) {
+          block.position = parsedConfig
+        }
+      }
+
+      // Handle simple property attributes (like 'direction')
+      const directionAttributeValue = data[`${blockIdCamelCase}Direction`]
+      if (directionAttributeValue) {
+        block.direction = directionAttributeValue
+      }
+    })
+
+    return newConfig
   }
 
   public addPlugin(plugin: Plugin) {
@@ -70,8 +135,18 @@ export class ComparisonSlider {
     const handleGrip = this.container.querySelector('.handle-grip')! as HTMLElement
     const direction = covered.dataset.direction as 'horizontal' | 'vertical'
 
+    this.container.classList.add(direction)
+
     this.filterEngine = new FilterEngine(originalCanvas, filteredCanvas, this.originalImage)
-    this.dragController = new DragController(covered, handleGrip, handleLine, filteredCanvas, direction)
+    this.dragController = new DragController(
+      covered,
+      handleGrip,
+      handleLine,
+      filteredCanvas,
+      direction,
+      this.config,
+      this.events
+    )
 
     this.resetPosition()
     this.plugins.forEach(plugin => plugin.initialize())

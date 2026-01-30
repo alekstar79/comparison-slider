@@ -1,6 +1,12 @@
+import { EventEmitter } from './EventEmitter'
+import { UIConfig } from '../config'
+
 export class DragController {
-  private readonly filteredCanvas: HTMLCanvasElement
+  private readonly events: EventEmitter
+  private readonly config: UIConfig
+
   private readonly direction: 'horizontal' | 'vertical'
+  private readonly filteredCanvas: HTMLCanvasElement
   private readonly boundary: HTMLElement
   private readonly handleGrip: HTMLElement
   private readonly handleLine: HTMLElement
@@ -16,13 +22,17 @@ export class DragController {
     handleGrip: HTMLElement,
     handleLine: HTMLElement,
     filteredCanvas: HTMLCanvasElement,
-    direction: 'horizontal' | 'vertical'
+    direction: 'horizontal' | 'vertical',
+    config: UIConfig,
+    events: EventEmitter
   ) {
     this.boundary = boundary
     this.handleGrip = handleGrip
     this.handleLine = handleLine
     this.filteredCanvas = filteredCanvas
     this.direction = direction
+    this.config = config
+    this.events = events
 
     // Add direction classes to make the line and grip visible and oriented correctly
     this.handleLine.classList.add(direction)
@@ -42,6 +52,7 @@ export class DragController {
 
     this.handleGrip.style.transform = `translate(${this.posX}px, ${this.posY}px)`
     this.scheduleUpdate()
+    this.events.emit('positionChange', { x: this.posX, y: this.posY })
   }
 
   private getClientPos(e: MouseEvent | TouchEvent) {
@@ -82,6 +93,15 @@ export class DragController {
     this.handleGrip.addEventListener('touchstart', onStart, { passive: false })
     document.addEventListener('touchmove', onMove, { passive: false })
     document.addEventListener('touchend', onEnd)
+
+    if (this.config.hoverToSlide) {
+      this.boundary.addEventListener('mousemove', (e) => {
+        if (this.isDragging) return
+
+        const { x, y } = this.getClientPos(e)
+        this.setPosition(x, y)
+      })
+    }
   }
 
   private scheduleUpdate() {

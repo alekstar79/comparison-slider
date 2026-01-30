@@ -10,10 +10,10 @@ export class SliderHtmlBuilder {
     const initX = img.dataset.initX || '25'
     const initY = img.dataset.initY || '25'
 
-    const coveredContent = `<div 
-      class="covered" 
-      data-direction="${direction}" 
-      data-init-x="${initX}" 
+    const coveredContent = `<div
+      class="covered"
+      data-direction="${direction}"
+      data-init-x="${initX}"
       data-init-y="${initY}"
     >
       <canvas class="original-canvas"></canvas>
@@ -52,9 +52,14 @@ export class SliderHtmlBuilder {
         }
       })
 
+    const labelsHtml = `
+      <div class="comparison-label label-after"></div>
+      <div class="comparison-label label-before"></div>
+    `
+
     container.className = `slider-container ${img.className}`
     container.style.aspectRatio = `${img.naturalWidth} / ${img.naturalHeight}`
-    container.innerHTML = coveredContent + uiElementsHtml + `<div class="handle-grip"></div>`
+    container.innerHTML = coveredContent + uiElementsHtml + labelsHtml + `<div class="handle-grip"></div>`
 
     const parent = img.parentNode!
 

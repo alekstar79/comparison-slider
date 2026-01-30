@@ -320,7 +320,7 @@ export class MagnifierPlugin implements Plugin {
     const radius = size / 2
     const containerRect = this.slider.container.getBoundingClientRect()
 
-    const elements = this.slider.container.querySelectorAll('.ui-block button, .handle-grip, .handle-line, .nav-button, .ui-panel, .filter-buttons button')
+    const elements = this.slider.container.querySelectorAll('.ui-block button, .handle-grip, .handle-line, .nav-button, .ui-panel, .filter-buttons button, .comparison-label')
 
     elements.forEach(el => {
       const htmlEl = el as HTMLElement
@@ -411,7 +411,7 @@ export class MagnifierPlugin implements Plugin {
         this.ctx.textAlign = 'center'
         this.ctx.textBaseline = 'middle'
         this.ctx.fillText(text, dx + dWidth / 2, dy + dHeight / 2)
-      } else if (htmlEl.tagName === 'BUTTON' && htmlEl.innerText) {
+      } else if ((htmlEl.tagName === 'BUTTON' || htmlEl.classList.contains('comparison-label')) && htmlEl.innerText) {
         const baseFontSize = parseFloat(styles.fontSize)
         const magnifiedFontSize = baseFontSize * zoom
 

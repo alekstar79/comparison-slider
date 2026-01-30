@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="./src/plugins/SavePlugin.css">
   <link rel="stylesheet" href="./src/plugins/FilterPlugin.css">
   <link rel="stylesheet" href="./src/plugins/MagnifierPlugin.css">
+  <link rel="stylesheet" href="./src/plugins/LabelPlugin.css">
 </head>
 <body>
   <h1>Image Comparison Slider</h1>
@@ -26,10 +27,13 @@
     src=""
   >
   <img
-    data-imgset="./images/m1.jpg,./images/c1.jpg,./images/l1.jpg"
     class="slider-large"
+    data-imgset="./images/m1.jpg,./images/c1.jpg,./images/l1.jpg"
+    data-features-buttons="{ bottom: '10px', left: '10px' }"
+    data-features-buttons-direction="horizontal"
     data-comparison-slide
-    data-init-x="100"
+    data-direction="horizontal"
+    data-init-x="250"
     data-init-y="300"
     data-filters="Contrast,Sepia,Glow"
     alt=""
@@ -38,6 +42,10 @@
   <img
     src="./images/l1.jpg"
     class="slider-large"
+    data-action-buttons="{ top: '50%', transform: 'translateY(-50%)', left: '10px' }"
+    data-features-buttons="{ top: '50%', transform: 'translateY(-50%)', right: '10px' }"
+    data-action-buttons-direction="vertical"
+    data-features-buttons-direction="vertical"
     data-comparison-slide
     data-direction="vertical"
     data-init-x="300"

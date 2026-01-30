@@ -6,6 +6,7 @@ import { FilterPlugin } from './plugins/FilterPlugin'
 import { FullscreenPlugin } from './plugins/FullscreenPlugin'
 import { ImagePanPlugin } from './plugins/ImagePanPlugin'
 import { ImageSetPlugin } from './plugins/ImageSetPlugin'
+import { LabelPlugin } from './plugins/LabelPlugin'
 import { LoadImagePlugin } from './plugins/LoadImagePlugin'
 import { MagnifierPlugin } from './plugins/MagnifierPlugin'
 import { SavePlugin } from './plugins/SavePlugin'
@@ -39,6 +40,19 @@ export interface UIBlock {
 export interface UIConfig {
   plugins: { new (slider: any, config: UIConfig, events: EventEmitter): Plugin }[];
   uiBlocks: UIBlock[];
+  hoverToSlide?: boolean;
+  imageSet?: {
+    cyclic: boolean;
+    autoplay: boolean;
+    interval?: number;
+    pauseOnHover?: boolean;
+    transitionEffect?: 'slide' | 'blinds' | 'dissolve' | 'wipe' | 'wave';
+  };
+  labels?: {
+    before: string;
+    after: string;
+    position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  };
   magnifier: {
     button: string;
     size: number;
@@ -48,13 +62,6 @@ export interface UIConfig {
   pan?: {
     allowedRatioDeviation: number;
   };
-  imageSet?: {
-    cyclic: boolean;
-    autoplay: boolean;
-    interval?: number;
-    pauseOnHover?: boolean;
-    transitionEffect?: 'slide' | 'blinds' | 'dissolve' | 'wipe' | 'wave';
-  }
 }
 
 export const defaultConfig: UIConfig = {
@@ -66,6 +73,7 @@ export const defaultConfig: UIConfig = {
     LoadImagePlugin,
     MagnifierPlugin,
     SavePlugin,
+    LabelPlugin,
   ],
   uiBlocks: [
     {
@@ -131,20 +139,26 @@ export const defaultConfig: UIConfig = {
       ]
     }
   ],
-  magnifier: {
-    button: '#magnifierButton',
-    size: 150,
-    defaultZoom: 2,
-    zoomLevels: [1.5, 2, 3],
-  },
-  pan: {
-    allowedRatioDeviation: 0.1,
-  },
+  hoverToSlide: false,
   imageSet: {
     cyclic: true,
     autoplay: true,
     interval: 3000,
     pauseOnHover: true,
-    transitionEffect: 'slide',
+    transitionEffect: 'slide'
+  },
+  labels: {
+    before: 'Original',
+    after: 'Filtered',
+    position: 'top-left'
+  },
+  magnifier: {
+    button: '#magnifierButton',
+    size: 150,
+    defaultZoom: 2,
+    zoomLevels: [1.5, 2, 3]
+  },
+  pan: {
+    allowedRatioDeviation: 0.1
   }
 }
