@@ -6,10 +6,13 @@ import { renderWaveTransition } from '../effects/wave'
 
 export class FilterEngine {
   public originalImage: HTMLImageElement
+
   public readonly originalCanvas: HTMLCanvasElement
   public readonly filteredCanvas: HTMLCanvasElement
+
   public readonly originalCtx: CanvasRenderingContext2D
   public readonly filteredCtx: CanvasRenderingContext2D
+
   public pixelCoordinates: { x: number, y: number }[] | null = null
   public panOffset = { x: 0, y: 0 }
 

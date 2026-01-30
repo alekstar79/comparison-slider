@@ -1,7 +1,4 @@
-import { Plugin } from './core/ComparisonSlider'
-
 import { EventEmitter } from './core/EventEmitter'
-
 import { FilterPlugin } from './plugins/FilterPlugin'
 import { FullscreenPlugin } from './plugins/FullscreenPlugin'
 import { ImagePanPlugin } from './plugins/ImagePanPlugin'
@@ -10,6 +7,11 @@ import { LabelPlugin } from './plugins/LabelPlugin'
 import { LoadImagePlugin } from './plugins/LoadImagePlugin'
 import { MagnifierPlugin } from './plugins/MagnifierPlugin'
 import { SavePlugin } from './plugins/SavePlugin'
+
+export interface Plugin {
+  initialize(): void;
+  destroy?: () => void;
+}
 
 export interface ButtonPosition {
   bottom?: string;
@@ -65,7 +67,7 @@ export interface UIConfig {
 }
 
 export const defaultConfig: UIConfig = {
-  comparison: false,
+  comparison: true,
   plugins: [
     FilterPlugin,
     FullscreenPlugin,
@@ -146,7 +148,7 @@ export const defaultConfig: UIConfig = {
     autoplay: true,
     interval: 3000,
     pauseOnHover: true,
-    transitionEffect: 'slide'
+    transitionEffect: 'slide' // 'blinds', 'dissolve', 'wipe', 'wave'
   },
   labels: {
     before: 'Original',
@@ -154,7 +156,7 @@ export const defaultConfig: UIConfig = {
   },
   magnifier: {
     button: '#magnifierButton',
-    size: 150,
+    size: 180,
     defaultZoom: 2,
     zoomLevels: [1.5, 2, 3]
   },

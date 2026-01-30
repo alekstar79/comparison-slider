@@ -1,5 +1,6 @@
-import { ComparisonSlider, Plugin } from '../core/ComparisonSlider'
-import { UIConfig } from '../config'
+import type { UIConfig, Plugin } from '../config'
+
+import { ComparisonSlider } from '../core/ComparisonSlider'
 import { EventEmitter } from '../core/EventEmitter'
 
 export class MagnifierPlugin implements Plugin {
@@ -38,6 +39,7 @@ export class MagnifierPlugin implements Plugin {
     this.attachEventListeners()
 
     this.events.on('frameUpdate', this.onFrameUpdate.bind(this))
+    this.events.on('filterChange', this.onFrameUpdate.bind(this))
   }
 
   public onFrameUpdate(): void {
@@ -238,7 +240,7 @@ export class MagnifierPlugin implements Plugin {
   }
 
   private updateMagnifierContent(x: number, y: number): void {
-    const { originalCanvas /*, filteredCanvas */ } = this.slider.filterEngine
+    const { originalCanvas } = this.slider.filterEngine
     const { size } = this.config.magnifier
     const zoom = this.currentZoom
     const radius = size / 2
@@ -277,36 +279,51 @@ export class MagnifierPlugin implements Plugin {
       this.ctx.clip(path)
     }
 
-    // 1. Draw original image
-    this.ctx.drawImage(originalCanvas, sx, sy, sw, sh, 0, 0, size, size)
+    if (!this.config.comparison) {
+      // Single view mode: just draw the filtered canvas
+      this.ctx.save()
 
-    // 2. Calculate clipping region for the filtered part
-    const handleX = this.slider.dragController.posX
-    const handleY = this.slider.dragController.posY
-    const direction = coveredEl.dataset.direction as 'horizontal' | 'vertical'
+      const currentFilter = this.slider.filterEngine.filteredCanvas.style.filter
+      if (currentFilter) {
+        this.ctx.filter = currentFilter
+      }
 
-    const handlePosition = direction === 'horizontal' ? handleX : handleY
-    const cursorPosition = direction === 'horizontal' ? x : y
-
-    const magnifierHandlePosition = ((handlePosition - cursorPosition) * zoom) + radius
-
-    // 3. Clip and draw the filtered image
-    this.ctx.save()
-
-    const currentFilter = this.slider.filterEngine.filteredCanvas.style.filter
-    if (currentFilter) {
-      this.ctx.filter = currentFilter
-    }
-
-    this.ctx.beginPath()
-    if (direction === 'horizontal') {
-      this.ctx.rect(0, 0, magnifierHandlePosition, size)
+      this.ctx.drawImage(originalCanvas, sx, sy, sw, sh, 0, 0, size, size)
+      this.ctx.restore()
     } else {
-      this.ctx.rect(0, 0, size, magnifierHandlePosition)
+      // Comparison mode: draw both original and filtered parts
+      // 1. Draw original image
+      this.ctx.drawImage(originalCanvas, sx, sy, sw, sh, 0, 0, size, size)
+
+      // 2. Calculate clipping region for the filtered part
+      const handleX = this.slider.dragController.posX
+      const handleY = this.slider.dragController.posY
+
+      const direction = coveredEl.dataset.direction as 'horizontal' | 'vertical'
+      const handlePosition = direction === 'horizontal' ? handleX : handleY
+      const cursorPosition = direction === 'horizontal' ? x : y
+
+      const magnifierHandlePosition = ((handlePosition - cursorPosition) * zoom) + radius
+
+      // 3. Clip and draw the filtered image
+      this.ctx.save()
+
+      const currentFilter = this.slider.filterEngine.filteredCanvas.style.filter
+      if (currentFilter) {
+        this.ctx.filter = currentFilter
+      }
+
+      this.ctx.beginPath()
+      if (direction === 'horizontal') {
+        this.ctx.rect(0, 0, magnifierHandlePosition, size)
+      } else {
+        this.ctx.rect(0, 0, size, magnifierHandlePosition)
+      }
+
+      this.ctx.clip()
+      this.ctx.drawImage(originalCanvas, sx, sy, sw, sh, 0, 0, size, size)
+      this.ctx.restore()
     }
-    this.ctx.clip()
-    this.ctx.drawImage(originalCanvas, sx, sy, sw, sh, 0, 0, size, size)
-    this.ctx.restore()
 
     // 4. Draw UI elements
     this.drawUIElements(x, y)
@@ -341,6 +358,7 @@ export class MagnifierPlugin implements Plugin {
 
       const dx = (elX - mouseX) * zoom + radius
       const dy = (elY - mouseY) * zoom + radius
+
       const dWidth = rect.width * zoom
       const dHeight = rect.height * zoom
 

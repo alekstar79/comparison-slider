@@ -1,8 +1,9 @@
+import type { UIConfig, Plugin } from '../config'
+
 import { ComparisonSlider } from '../core/ComparisonSlider'
 import { EventEmitter } from '../core/EventEmitter'
-import { UIConfig } from '../config'
 
-export class ImageSetPlugin {
+export class ImageSetPlugin implements Plugin {
   private readonly slider: ComparisonSlider
   private readonly events: EventEmitter
   private readonly config: UIConfig

@@ -1,8 +1,9 @@
+import type { UIConfig, Plugin } from '../config'
+
 import { ComparisonSlider } from '../core/ComparisonSlider'
 import { EventEmitter } from '../core/EventEmitter'
-import { UIConfig } from '../config'
 
-export class LoadImagePlugin {
+export class LoadImagePlugin implements Plugin {
   private readonly fileInput: HTMLInputElement
   private readonly slider: ComparisonSlider
 
@@ -13,7 +14,6 @@ export class LoadImagePlugin {
 
   public initialize() {
     const uploadButton = this.slider.container.querySelector('#uploadButton')
-
     if (uploadButton) {
       uploadButton.addEventListener('click', () => {
         this.fileInput.click()

@@ -1,6 +1,7 @@
-import { ComparisonSlider, Plugin } from '../core/ComparisonSlider'
+import type { UIConfig, Plugin } from '../config'
+
+import { ComparisonSlider } from '../core/ComparisonSlider'
 import { EventEmitter } from '../core/EventEmitter'
-import { UIConfig } from '../config'
 
 export class ImagePanPlugin implements Plugin {
   private slider: ComparisonSlider

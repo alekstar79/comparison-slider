@@ -1,8 +1,9 @@
+import type { UIConfig, Plugin } from '../config'
+
 import { SliderHtmlBuilder } from './SliderHtmlBuilder'
 import { DragController } from './DragController'
 import { FilterEngine } from './FilterEngine'
 import { EventEmitter } from './EventEmitter'
-import { UIConfig } from '../config'
 
 function isObject(item: any): item is Record<string, any> {
   return (item && typeof item === 'object' && !Array.isArray(item))
@@ -24,11 +25,6 @@ function parseDataAttribute(value: string): object | null {
   } catch (e) {
     return null
   }
-}
-
-export interface Plugin {
-  initialize(): void;
-  destroy?: () => void;
 }
 
 export class ComparisonSlider {

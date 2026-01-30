@@ -1,8 +1,9 @@
+import type { UIConfig, Plugin } from '../config'
+
 import { ComparisonSlider } from '../core/ComparisonSlider'
 import { EventEmitter } from '../core/EventEmitter'
-import { UIConfig } from '../config'
 
-export class FilterPlugin {
+export class FilterPlugin implements Plugin{
   private uiPanel!: HTMLElement
   private toggleButton!: HTMLButtonElement
   private filterButtons!: HTMLButtonElement[]
@@ -18,7 +19,6 @@ export class FilterPlugin {
     this.uiPanel = this.slider.container.querySelector('#filterPanel')!
     this.toggleButton = this.slider.container.querySelector('#toggleButton')!
     this.filterButtons = Array.from(this.uiPanel.querySelectorAll('.filter-buttons button'))
-
     this.bindEvents()
     this.setInitialFilter()
   }
@@ -38,7 +38,7 @@ export class FilterPlugin {
     const targetButton = event.currentTarget as HTMLButtonElement
     const filterValue = targetButton.dataset.filter!
     const filterName = targetButton.textContent || ''
-    
+
     this.slider.filterEngine.applyFilter(filterValue)
     this.setActiveButton(targetButton)
     this.events.emit('filterChange', { name: filterName, value: filterValue })

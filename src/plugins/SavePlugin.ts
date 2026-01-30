@@ -1,8 +1,9 @@
+import type { UIConfig, Plugin } from '../config'
+
 import { ComparisonSlider } from '../core/ComparisonSlider'
 import { EventEmitter } from '../core/EventEmitter'
-import { UIConfig } from '../config'
 
-export class SavePlugin {
+export class SavePlugin implements Plugin {
   private readonly slider: ComparisonSlider
 
   constructor(slider: ComparisonSlider, _config: UIConfig, _events: EventEmitter) {

@@ -1,8 +1,9 @@
+import type { UIConfig, Plugin } from '../config'
+
 import { ComparisonSlider } from '../core/ComparisonSlider'
 import { EventEmitter } from '../core/EventEmitter'
-import { UIConfig } from '../config'
 
-export class FullscreenPlugin {
+export class FullscreenPlugin implements Plugin {
   private readonly slider: ComparisonSlider
   private button!: HTMLElement
 
