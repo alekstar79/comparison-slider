@@ -68,7 +68,9 @@ export class ComparisonSlider {
 
     // Merge uiBlocks data-attributes
     newConfig.uiBlocks.forEach((block: any) => {
-      const blockIdCamelCase = block.id.replace(/-(\w)/g, (_: string, c: string) => c.toUpperCase())
+      const blockIdCamelCase = block.id.replace(/-(\w)/g, (_: any, c: string) => {
+        return c.toUpperCase()
+      })
 
       // Handle complex object attributes (like 'position')
       const positionAttributeValue = data[blockIdCamelCase]
@@ -109,8 +111,7 @@ export class ComparisonSlider {
     this.events.emit('imageUpdate', { image: this.originalImage })
   }
 
-  private async init()
-  {
+  private async init() {
     const imgSetAttr = this.originalImage.dataset.imgset
 
     if (imgSetAttr && imgSetAttr.length > 0) {
