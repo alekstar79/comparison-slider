@@ -37,8 +37,11 @@ export class SliderHtmlBuilder {
             )
           }
 
-          // If not in comparison mode, ensure an "Original" filter option exists
-          if (!config.comparison) {
+          // If in comparison mode, ensure "Original" filter is NOT present initially
+          if (config.comparison) {
+            filtersToRender = filtersToRender.filter(f => f.value !== 'none')
+          } else {
+            // If not in comparison mode, ensure an "Original" filter option exists
             const hasOriginal = filtersToRender.some(f => f.value === 'none')
             if (!hasOriginal) {
               filtersToRender.unshift({ name: 'Original', value: 'none' })

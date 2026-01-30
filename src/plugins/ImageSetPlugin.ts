@@ -15,7 +15,6 @@ export class ImageSetPlugin implements Plugin {
   private currentIndex = 0
   private autoplayTimer: number | null = null
   private isTransitioning = false
-  private isHovering = false
 
   constructor(
     slider: ComparisonSlider,
@@ -82,18 +81,12 @@ export class ImageSetPlugin implements Plugin {
   }
 
   private bindEvents() {
-    this.nextButton.addEventListener('click', () => this.navigate('next', true))
-    this.prevButton.addEventListener('click', () => this.navigate('previous', true))
+    this.nextButton.addEventListener('click', () => this.navigate('next'))
+    this.prevButton.addEventListener('click', () => this.navigate('prev'))
 
     if (this.config.imageSet?.autoplay && this.config.imageSet?.pauseOnHover) {
-      this.slider.container.addEventListener('mouseenter', () => {
-        this.isHovering = true
-        this.stopAutoplay()
-      })
-      this.slider.container.addEventListener('mouseleave', () => {
-        this.isHovering = false
-        this.startAutoplay()
-      })
+      this.slider.container.addEventListener('mouseenter', () => this.stopAutoplay())
+      this.slider.container.addEventListener('mouseleave', () => this.startAutoplay())
     }
 
     document.addEventListener('visibilitychange', () => {
@@ -105,17 +98,18 @@ export class ImageSetPlugin implements Plugin {
     })
   }
 
-  private async navigate(direction: 'next' | 'previous', userInitiated = false) {
+  private async navigate(direction: 'next' | 'prev') {
     if (this.isTransitioning) return
 
     this.isTransitioning = true
-    if (userInitiated) {
-      this.stopAutoplay()
-    }
+    this.stopAutoplay()
 
     const newIndex = this.calculateNewIndex(direction)
     if (newIndex === this.currentIndex && !this.config.imageSet?.cyclic) {
       this.isTransitioning = false
+      if (this.config.imageSet?.autoplay) {
+        this.startAutoplay()
+      }
       return
     }
 
@@ -123,16 +117,12 @@ export class ImageSetPlugin implements Plugin {
     this.currentIndex = newIndex
     this.isTransitioning = false
 
-    if (userInitiated && this.config.imageSet?.autoplay) {
-      // Restart autoplay after user interaction, respecting pauseOnHover
-      this.startAutoplay()
-    } else if (this.config.imageSet?.autoplay) {
-      // This handles the interval-based navigation
+    if (this.config.imageSet?.autoplay) {
       this.startAutoplay()
     }
   }
 
-  private calculateNewIndex(direction: 'next' | 'previous'): number {
+  private calculateNewIndex(direction: 'next' | 'prev'): number {
     let newIndex = this.currentIndex
 
     if (direction === 'next') {
@@ -150,7 +140,7 @@ export class ImageSetPlugin implements Plugin {
     return newIndex
   }
 
-  private async transitionTo(newIndex: number, direction: 'next' | 'previous') {
+  private async transitionTo(newIndex: number, direction: 'next' | 'prev') {
     const fromImg = this.images[this.currentIndex]
     const toImg = this.images[newIndex]
     const duration = 400
@@ -196,13 +186,15 @@ export class ImageSetPlugin implements Plugin {
   private startAutoplay() {
     this.stopAutoplay() // Ensure no multiple timers are running
 
-    if (this.config.imageSet?.autoplay && this.images.length > 1) {
-      if (this.config.imageSet.pauseOnHover && this.isHovering) return // Don't start if hovering and pauseOnHover is active
+    if (!this.config.imageSet?.autoplay || this.images.length <= 1) return
 
-      this.autoplayTimer = window.setInterval(() => {
-        return this.navigate('next')
-      }, this.config.imageSet?.interval || 3000)
-    }
+    const isCurrentlyHovered = this.slider.container.matches(':hover')
+
+    if (this.config.imageSet.pauseOnHover && isCurrentlyHovered) return
+
+    this.autoplayTimer = window.setInterval(() => {
+      return this.navigate('next')
+    }, this.config.imageSet?.interval || 3000)
   }
 
   private stopAutoplay() {

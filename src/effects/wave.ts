@@ -5,7 +5,7 @@ export function renderWaveTransition(
   fromImg: HTMLImageElement,
   toImg: HTMLImageElement,
   progress: number,
-  direction: 'next' | 'previous'
+  direction: 'next' | 'prev'
 ) {
   const fromData = engine.getImageData(fromImg)
   const toData = engine.getImageData(toImg)
@@ -32,7 +32,7 @@ export function renderWaveTransition(
     const toStart = pixelIndex
     const toEnd = pixelIndex + Math.min(width, threshold) * 4
 
-    if (direction === 'previous') {
+    if (direction === 'prev') {
       if (fromStart < fromEnd) newData.data.set(fromData.data.subarray(fromStart, fromEnd), fromStart)
       if (toStart < toEnd) newData.data.set(toData.data.subarray(toStart, toEnd), toStart)
     } else {

@@ -5,7 +5,7 @@ export function renderBlindsTransition(
   fromImg: HTMLImageElement,
   toImg: HTMLImageElement,
   progress: number,
-  direction: 'next' | 'previous'
+  direction: 'next' | 'prev'
 ) {
   const numBlinds = 10
   const blindWidth = engine.originalCanvas.width / numBlinds

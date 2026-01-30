@@ -109,12 +109,12 @@ export class FilterEngine {
     }
   }
 
-  public renderSlideTransition(fromImg: HTMLImageElement, toImg: HTMLImageElement, progress: number, direction: 'next' | 'previous') {
+  public renderSlideTransition(fromImg: HTMLImageElement, toImg: HTMLImageElement, progress: number, direction: 'next' | 'prev') {
     renderSlideTransition(this, fromImg, toImg, progress, direction)
     this.applyFilterToTransitionFrame()
   }
 
-  public renderBlindsTransition(fromImg: HTMLImageElement, toImg: HTMLImageElement, progress: number, direction: 'next' | 'previous') {
+  public renderBlindsTransition(fromImg: HTMLImageElement, toImg: HTMLImageElement, progress: number, direction: 'next' | 'prev') {
     renderBlindsTransition(this, fromImg, toImg, progress, direction)
     this.applyFilterToTransitionFrame()
   }
@@ -129,7 +129,7 @@ export class FilterEngine {
     this.applyFilterToTransitionFrame()
   }
 
-  public renderWaveTransition(fromImg: HTMLImageElement, toImg: HTMLImageElement, progress: number, direction: 'next' | 'previous') {
+  public renderWaveTransition(fromImg: HTMLImageElement, toImg: HTMLImageElement, progress: number, direction: 'next' | 'prev') {
     renderWaveTransition(this, fromImg, toImg, progress, direction)
     this.applyFilterToTransitionFrame()
   }

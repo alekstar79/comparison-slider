@@ -5,7 +5,7 @@ export function renderSlideTransition(
   fromImg: HTMLImageElement,
   toImg: HTMLImageElement,
   progress: number,
-  direction: 'next' | 'previous'
+  direction: 'next' | 'prev'
 ) {
   const d = direction === 'next' ? 1 : -1
   const fromOffset = -progress * engine.originalCanvas.width * d
