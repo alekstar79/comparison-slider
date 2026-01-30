@@ -13,6 +13,7 @@ export class DragController {
 
   private animationFrameId: number | null = null
   private isDragging = false
+  private isDisabled = false
 
   public posX = 200
   public posY = 100
@@ -41,11 +42,25 @@ export class DragController {
     this.bindEvents()
   }
 
+  public setDisabled(disabled: boolean) {
+    this.isDisabled = disabled
+    this.handleGrip.style.display = disabled ? 'none' : ''
+    this.handleLine.style.display = disabled ? 'none' : ''
+
+    if (disabled) {
+      this.filteredCanvas.style.clipPath = 'none'
+    } else {
+      this.updateClip()
+    }
+  }
+
   public getPosition(): { x: number; y: number } {
     return { x: this.posX, y: this.posY };
   }
 
   public setPosition(x: number, y: number) {
+    if (this.isDisabled) return
+
     const { clientWidth, clientHeight } = this.boundary
     this.posX = Math.max(0, Math.min(clientWidth, x))
     this.posY = Math.max(0, Math.min(clientHeight, y))
@@ -67,6 +82,7 @@ export class DragController {
 
   private bindEvents() {
     const onStart = (e: MouseEvent | TouchEvent) => {
+      if (this.isDisabled) return
       e.preventDefault()
 
       this.isDragging = true
@@ -74,7 +90,7 @@ export class DragController {
     }
 
     const onMove = (e: MouseEvent | TouchEvent) => {
-      if (!this.isDragging) return
+      if (!this.isDragging || this.isDisabled) return
       e.preventDefault()
 
       const { x, y } = this.getClientPos(e)
@@ -82,6 +98,7 @@ export class DragController {
     }
 
     const onEnd = () => {
+      if (this.isDisabled) return
       this.isDragging = false
       this.handleGrip.classList.remove('draggable')
     }
@@ -96,7 +113,7 @@ export class DragController {
 
     if (this.config.hoverToSlide) {
       this.boundary.addEventListener('mousemove', (e) => {
-        if (this.isDragging) return
+        if (this.isDragging || this.isDisabled) return
 
         const { x, y } = this.getClientPos(e)
         this.setPosition(x, y)
@@ -114,6 +131,7 @@ export class DragController {
 
   private updateClip() {
     this.animationFrameId = null
+    if (this.isDisabled) return
 
     if (this.direction === 'horizontal') {
       this.filteredCanvas.style.clipPath = `inset(0 calc(100% - ${this.posX}px) 0 0)`

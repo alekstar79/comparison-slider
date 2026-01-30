@@ -9,6 +9,8 @@ export class FilterPlugin implements Plugin{
   private filterButtons!: HTMLButtonElement[]
   private readonly slider: ComparisonSlider
   private readonly events: EventEmitter
+  private originalFilterButton: HTMLButtonElement | null = null
+  private lastActiveFilterButton: HTMLButtonElement | null = null
 
   constructor(slider: ComparisonSlider, _config: UIConfig, events: EventEmitter) {
     this.slider = slider
@@ -28,6 +30,39 @@ export class FilterPlugin implements Plugin{
     this.filterButtons.forEach(btn => {
       btn.addEventListener('click', (e) => this.onFilterClick(e))
     })
+    this.events.on('comparisonViewChange', ({ isComparisonView }) => this.onComparisonViewChange(isComparisonView))
+  }
+
+  private onComparisonViewChange(isComparisonView: boolean) {
+    if (!isComparisonView) {
+      // Switched to single view
+      this.lastActiveFilterButton = this.filterButtons.find(btn => btn.classList.contains('active')) || null
+
+      if (!this.originalFilterButton) {
+        const button = document.createElement('button')
+        button.dataset.filter = 'none'
+        button.textContent = 'Original'
+        button.addEventListener('click', (e) => this.onFilterClick(e))
+
+        this.uiPanel.querySelector('.filter-buttons')?.prepend(button)
+        this.originalFilterButton = button
+        this.filterButtons.unshift(button)
+      }
+      this.onFilterClick({ currentTarget: this.originalFilterButton } as unknown as MouseEvent)
+    } else {
+      // Switched to comparison view
+      if (this.originalFilterButton) {
+        this.originalFilterButton.remove()
+        this.filterButtons.shift()
+        this.originalFilterButton = null
+
+        if (this.lastActiveFilterButton) {
+          this.onFilterClick({ currentTarget: this.lastActiveFilterButton } as unknown as MouseEvent)
+        } else {
+          this.setInitialFilter()
+        }
+      }
+    }
   }
 
   private toggleUiPanel() {

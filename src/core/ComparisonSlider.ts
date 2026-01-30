@@ -38,11 +38,13 @@ export class ComparisonSlider {
 
   public readonly plugins: Plugin[] = []
   public readonly config: UIConfig
+  public isComparisonView = true
 
   constructor(img: HTMLImageElement, config: UIConfig)
   {
     this.originalImage = img
     this.config = this.buildConfig(config)
+    this.isComparisonView = this.config.comparison
     this.init().catch(console.error)
   }
 
@@ -53,6 +55,9 @@ export class ComparisonSlider {
     newConfig.plugins = [...baseConfig.plugins]
 
     // Merge simple data-attributes
+    if (data.comparison) {
+      newConfig.comparison = data.comparison === 'true'
+    }
     if (data.hoverToSlide) {
       newConfig.hoverToSlide = data.hoverToSlide === 'true'
     }
@@ -104,7 +109,7 @@ export class ComparisonSlider {
     }
 
     this.filterEngine.updateImage(this.originalImage)
-    if (reset && this.config.comparison) {
+    if (reset && this.isComparisonView && this.dragController) {
       this.resetPosition()
     }
 
@@ -133,7 +138,7 @@ export class ComparisonSlider {
     const direction = covered.dataset.direction as 'horizontal' | 'vertical'
 
     this.container.classList.add(direction)
-    if (!this.config.comparison) {
+    if (!this.isComparisonView) {
       this.container.classList.add('mode-single-view')
     }
 
@@ -149,11 +154,35 @@ export class ComparisonSlider {
         this.events
       )
 
-      this.resetPosition()
+      if (this.isComparisonView) {
+        this.resetPosition()
+      }
+
+      const comparisonButton = this.container.querySelector('#comparisonButton')
+      if (comparisonButton) {
+        comparisonButton.addEventListener('click', () => this.toggleComparisonView())
+      }
+    } else {
+      const comparisonButton = this.container.querySelector('#comparisonButton') as HTMLElement
+      if (comparisonButton) {
+        comparisonButton.style.display = 'none'
+      }
     }
 
     this.plugins.forEach(plugin => plugin.initialize())
     this.setupResizeObserver()
+  }
+
+  public toggleComparisonView() {
+    this.isComparisonView = !this.isComparisonView
+    this.container.classList.toggle('mode-single-view', !this.isComparisonView)
+    this.dragController.setDisabled(!this.isComparisonView)
+
+    if (this.isComparisonView) {
+      this.resetPosition()
+    }
+
+    this.events.emit('comparisonViewChange', { isComparisonView: this.isComparisonView })
   }
 
   private ensureImageLoaded(): Promise<void> {
@@ -169,10 +198,14 @@ export class ComparisonSlider {
   }
 
   private setupResizeObserver() {
-    this.resizeObserver = new ResizeObserver(() => {
-      this.filterEngine.redraw()
+    this.resizeObserver = new ResizeObserver((entries) => {
+      if (!entries || !entries.length) return
 
-      if (this.config.comparison) {
+      const { width, height } = entries[0].contentRect
+
+      this.filterEngine.redraw(width, height)
+
+      if (this.isComparisonView && this.dragController) {
         this.resetPosition()
       }
 

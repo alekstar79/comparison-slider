@@ -141,7 +141,7 @@ export const defaultConfig: UIConfig = {
         },
         {
           id: 'comparisonButton',
-          iconSvg: 'T'
+          iconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 0 0-10-10C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10zm-10 8c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" /><path d="M13 4.07a8.002 8.002 0 0 1 0 15.86V4.07z" /></svg>'
         }
       ]
     }

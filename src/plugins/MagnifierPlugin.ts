@@ -38,11 +38,12 @@ export class MagnifierPlugin implements Plugin {
     this.createZoomPanel()
     this.attachEventListeners()
 
-    this.events.on('frameUpdate', this.onFrameUpdate.bind(this))
-    this.events.on('filterChange', this.onFrameUpdate.bind(this))
+    this.events.on('frameUpdate', this.requestUpdate.bind(this))
+    this.events.on('filterChange', this.requestUpdate.bind(this))
+    this.events.on('comparisonViewChange', this.requestUpdate.bind(this))
   }
 
-  public onFrameUpdate(): void {
+  private requestUpdate(): void {
     if (this.isEnabled && this.lastMousePosition) {
       this.update(this.lastMousePosition.x, this.lastMousePosition.y)
     }
@@ -240,7 +241,7 @@ export class MagnifierPlugin implements Plugin {
   }
 
   private updateMagnifierContent(x: number, y: number): void {
-    const { originalCanvas } = this.slider.filterEngine
+    const { originalCanvas, filteredCanvas } = this.slider.filterEngine
     const { size } = this.config.magnifier
     const zoom = this.currentZoom
     const radius = size / 2
@@ -279,50 +280,41 @@ export class MagnifierPlugin implements Plugin {
       this.ctx.clip(path)
     }
 
-    if (!this.config.comparison) {
+    if (!this.slider.isComparisonView) {
       // Single view mode: just draw the filtered canvas
-      this.ctx.save()
-
-      const currentFilter = this.slider.filterEngine.filteredCanvas.style.filter
-      if (currentFilter) {
-        this.ctx.filter = currentFilter
-      }
-
-      this.ctx.drawImage(originalCanvas, sx, sy, sw, sh, 0, 0, size, size)
-      this.ctx.restore()
+      this.ctx.drawImage(filteredCanvas, sx, sy, sw, sh, 0, 0, size, size)
     } else {
       // Comparison mode: draw both original and filtered parts
       // 1. Draw original image
       this.ctx.drawImage(originalCanvas, sx, sy, sw, sh, 0, 0, size, size)
 
-      // 2. Calculate clipping region for the filtered part
-      const handleX = this.slider.dragController.posX
-      const handleY = this.slider.dragController.posY
+      // 2. Calculate clipping region for the filtered part, if dragController exists
+      if (this.slider.dragController) {
+        const handleX = this.slider.dragController.posX
+        const handleY = this.slider.dragController.posY
 
-      const direction = coveredEl.dataset.direction as 'horizontal' | 'vertical'
-      const handlePosition = direction === 'horizontal' ? handleX : handleY
-      const cursorPosition = direction === 'horizontal' ? x : y
+        const direction = coveredEl.dataset.direction as 'horizontal' | 'vertical'
+        const handlePosition = direction === 'horizontal' ? handleX : handleY
+        const cursorPosition = direction === 'horizontal' ? x : y
 
-      const magnifierHandlePosition = ((handlePosition - cursorPosition) * zoom) + radius
+        const magnifierHandlePosition = ((handlePosition - cursorPosition) * zoom) + radius
 
-      // 3. Clip and draw the filtered image
-      this.ctx.save()
+        // 3. Clip and draw the filtered image
+        this.ctx.save()
+        this.ctx.beginPath()
+        if (direction === 'horizontal') {
+          this.ctx.rect(0, 0, magnifierHandlePosition, size)
+        } else {
+          this.ctx.rect(0, 0, size, magnifierHandlePosition)
+        }
 
-      const currentFilter = this.slider.filterEngine.filteredCanvas.style.filter
-      if (currentFilter) {
-        this.ctx.filter = currentFilter
-      }
-
-      this.ctx.beginPath()
-      if (direction === 'horizontal') {
-        this.ctx.rect(0, 0, magnifierHandlePosition, size)
+        this.ctx.clip()
+        this.ctx.drawImage(filteredCanvas, sx, sy, sw, sh, 0, 0, size, size)
+        this.ctx.restore()
       } else {
-        this.ctx.rect(0, 0, size, magnifierHandlePosition)
+        // Fallback for when there's no drag controller: draw the full filtered image
+        this.ctx.drawImage(filteredCanvas, sx, sy, sw, sh, 0, 0, size, size)
       }
-
-      this.ctx.clip()
-      this.ctx.drawImage(originalCanvas, sx, sy, sw, sh, 0, 0, size, size)
-      this.ctx.restore()
     }
 
     // 4. Draw UI elements
@@ -336,6 +328,8 @@ export class MagnifierPlugin implements Plugin {
     const zoom = this.currentZoom
     const radius = size / 2
     const containerRect = this.slider.container.getBoundingClientRect()
+    const handlePos = this.slider.dragController?.getPosition()
+    const direction = this.slider.container.classList.contains('horizontal') ? 'horizontal' : 'vertical'
 
     const elements = this.slider.container.querySelectorAll('.ui-block button, .handle-grip, .handle-line, .nav-button, .ui-panel, .filter-buttons button, .comparison-label')
 
@@ -344,6 +338,16 @@ export class MagnifierPlugin implements Plugin {
       const styles = getComputedStyle(htmlEl)
 
       if (htmlEl.id === 'filterPanel' && !htmlEl.classList.contains('open')) {
+        return
+      }
+
+      // Hide handle grip and line if comparison view is off
+      if ((htmlEl.classList.contains('handle-grip') || htmlEl.classList.contains('handle-line')) && !this.slider.isComparisonView) {
+        return
+      }
+
+      // Hide 'after' label if comparison view is off
+      if (htmlEl.classList.contains('comparison-label-after') && !this.slider.isComparisonView) {
         return
       }
 
@@ -367,6 +371,12 @@ export class MagnifierPlugin implements Plugin {
       }
 
       this.ctx.save()
+
+      // Special clipping for labels
+      if (handlePos && htmlEl.classList.contains('comparison-label') && this.slider.isComparisonView) {
+        this.clipLabelInMagnifier(htmlEl, rect, containerRect, handlePos, direction, dx, dy, dWidth, dHeight)
+      }
+
       this.ctx.fillStyle = styles.backgroundColor
       this.ctx.globalAlpha = parseFloat(styles.opacity)
 
@@ -403,11 +413,7 @@ export class MagnifierPlugin implements Plugin {
         let cachedImage = this.iconCache.get(svgString)
         if (!cachedImage) {
           const img = new Image()
-          img.onload = () => {
-            if (this.isEnabled && this.lastMousePosition) {
-              this.update(this.lastMousePosition.x, this.lastMousePosition.y)
-            }
-          }
+          img.onload = () => this.requestUpdate()
           img.src = `data:image/svg+xml;base64,${btoa(svgString)}`
           cachedImage = img
           this.iconCache.set(svgString, cachedImage)
@@ -442,5 +448,42 @@ export class MagnifierPlugin implements Plugin {
 
       this.ctx.restore()
     })
+  }
+
+  private clipLabelInMagnifier(
+    htmlEl: HTMLElement,
+    rect: DOMRect,
+    containerRect: DOMRect,
+    handlePos: { x: number; y: number },
+    direction: 'horizontal' | 'vertical',
+    dx: number,
+    dy: number,
+    dWidth: number,
+    dHeight: number
+  ): void {
+    this.ctx.beginPath()
+
+    if (htmlEl.classList.contains('label-after')) {
+      if (direction === 'horizontal') {
+        const clipX = handlePos.x - (rect.left - containerRect.left)
+        const clampedClipX = Math.max(0, Math.min(rect.width, clipX))
+        this.ctx.rect(dx, dy, clampedClipX * this.currentZoom, dHeight)
+      } else {
+        const clipY = handlePos.y - (rect.top - containerRect.top)
+        const clampedClipY = Math.max(0, Math.min(rect.height, clipY))
+        this.ctx.rect(dx, dy, dWidth, clampedClipY * this.currentZoom)
+      }
+    } else if (htmlEl.classList.contains('label-before')) {
+      if (direction === 'horizontal') {
+        const clipX = handlePos.x - (rect.left - containerRect.left)
+        const clampedClipX = Math.max(0, Math.min(rect.width, clipX))
+        this.ctx.rect(dx + clampedClipX * this.currentZoom, dy, dWidth - clampedClipX * this.currentZoom, dHeight)
+      } else {
+        const clipY = handlePos.y - (rect.top - containerRect.top)
+        const clampedClipY = Math.max(0, Math.min(rect.height, clipY))
+        this.ctx.rect(dx, dy + clampedClipY * this.currentZoom, dWidth, dHeight - clampedClipY * this.currentZoom)
+      }
+    }
+    this.ctx.clip()
   }
 }

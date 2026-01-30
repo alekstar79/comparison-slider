@@ -18,25 +18,32 @@ export class SavePlugin implements Plugin {
   }
 
   private saveImage() {
-    const { originalImage, filterEngine } = this.slider
+    const { originalImage } = this.slider
     const tempCanvas = document.createElement('canvas')
     const tempCtx = tempCanvas.getContext('2d')!
 
+    // Set canvas to the full, original image size
     tempCanvas.width = originalImage.naturalWidth
     tempCanvas.height = originalImage.naturalHeight
 
-    const currentFilter = filterEngine.filteredCanvas.style.filter
-    if (currentFilter) {
+    // Get the current filter from the active button
+    const activeFilterButton = this.slider.container.querySelector('.filter-buttons button.active') as HTMLElement
+    const currentFilter = activeFilterButton ? activeFilterButton.dataset.filter : 'none'
+
+    // Apply the filter to the high-resolution context
+    if (currentFilter && currentFilter !== 'none') {
       tempCtx.filter = currentFilter
     }
 
-    tempCtx.drawImage(originalImage, 0, 0, originalImage.naturalWidth, originalImage.naturalHeight)
+    // Draw the original image to the high-resolution canvas
+    tempCtx.drawImage(originalImage, 0, 0)
 
+    // Generate file name
     const originalFileName = originalImage.src.split('/').pop()?.split('.').slice(0, -1).join('.') || 'image'
-    const activeFilterButton = this.slider.container.querySelector('.filter-buttons button.active') as HTMLElement
     const filterName = activeFilterButton ? activeFilterButton.innerText.toLowerCase().replace(/\s+/g, '-') : 'filtered'
     const finalFileName = `${originalFileName}-${filterName}.png`
 
+    // Trigger download
     const link = document.createElement('a')
     link.download = finalFileName
     link.href = tempCanvas.toDataURL('image/png')

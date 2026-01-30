@@ -9,12 +9,13 @@ export class ImageSetPlugin implements Plugin {
   private readonly config: UIConfig
 
   private images: HTMLImageElement[] = []
+  private nextButton!: HTMLButtonElement
+  private prevButton!: HTMLButtonElement
+
   private currentIndex = 0
   private autoplayTimer: number | null = null
   private isTransitioning = false
-
-  private nextButton!: HTMLButtonElement
-  private prevButton!: HTMLButtonElement
+  private isHovering = false
 
   constructor(
     slider: ComparisonSlider,
@@ -85,8 +86,14 @@ export class ImageSetPlugin implements Plugin {
     this.prevButton.addEventListener('click', () => this.navigate('previous', true))
 
     if (this.config.imageSet?.autoplay && this.config.imageSet?.pauseOnHover) {
-      this.slider.container.addEventListener('mouseenter', () => this.stopAutoplay())
-      this.slider.container.addEventListener('mouseleave', () => this.startAutoplay())
+      this.slider.container.addEventListener('mouseenter', () => {
+        this.isHovering = true
+        this.stopAutoplay()
+      })
+      this.slider.container.addEventListener('mouseleave', () => {
+        this.isHovering = false
+        this.startAutoplay()
+      })
     }
 
     document.addEventListener('visibilitychange', () => {
@@ -116,11 +123,12 @@ export class ImageSetPlugin implements Plugin {
     this.currentIndex = newIndex
     this.isTransitioning = false
 
-    if (userInitiated && this.config.imageSet?.autoplay && this.config.imageSet?.pauseOnHover) {
-      // If user initiated and pauseOnHover is true, autoplay will be restarted by mouseleave
-      // Do nothing here, let mouseleave handle it
+    if (userInitiated && this.config.imageSet?.autoplay) {
+      // Restart autoplay after user interaction, respecting pauseOnHover
+      this.startAutoplay()
     } else if (this.config.imageSet?.autoplay) {
-      this.startAutoplay() // Restart autoplay if not paused on hover
+      // This handles the interval-based navigation
+      this.startAutoplay()
     }
   }
 
@@ -186,8 +194,14 @@ export class ImageSetPlugin implements Plugin {
   }
 
   private startAutoplay() {
-    if (this.config.imageSet?.autoplay && this.images.length > 1 && !this.autoplayTimer) {
-      this.autoplayTimer = window.setInterval(() => this.navigate('next'), this.config.imageSet?.interval || 3000)
+    this.stopAutoplay() // Ensure no multiple timers are running
+
+    if (this.config.imageSet?.autoplay && this.images.length > 1) {
+      if (this.config.imageSet.pauseOnHover && this.isHovering) return // Don't start if hovering and pauseOnHover is active
+
+      this.autoplayTimer = window.setInterval(() => {
+        return this.navigate('next')
+      }, this.config.imageSet?.interval || 3000)
     }
   }
 

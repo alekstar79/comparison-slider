@@ -32,7 +32,7 @@ export class LabelPlugin implements Plugin {
     if (!this.afterLabel || !this.beforeLabel) return
 
     // In single view mode, just hide the 'before' label. CSS handles the rest.
-    if (!this.config.comparison) {
+    if (!this.slider.isComparisonView) {
       this.beforeLabel.style.display = 'none'
     }
 
@@ -43,12 +43,16 @@ export class LabelPlugin implements Plugin {
 
     this.updateLabelText()
 
-    if (this.config.comparison) {
+    if (this.slider.isComparisonView) {
       this.updateLabelPositions(this.slider.dragController.getPosition())
-      this.events.on('positionChange', (pos: { x: number, y: number }) => {
-        this.updateLabelPositions(pos)
-      })
     }
+
+    this.events.on('positionChange', (pos: { x: number, y: number }) => {
+      if (this.slider.isComparisonView) {
+        this.updateLabelPositions(pos)
+      }
+    })
+
 
     this.events.on('filterChange', (filter: { name: string, value: string }) => {
       this.currentFilterName = filter.name
@@ -56,16 +60,30 @@ export class LabelPlugin implements Plugin {
     })
 
     this.events.on('resize', () => {
-      if (this.config.comparison) {
+      if (this.slider.isComparisonView) {
         this.updateLabelPositions(this.slider.dragController.getPosition())
       }
     })
+
+    this.events.on('comparisonViewChange', ({ isComparisonView }) => this.onComparisonViewChange(isComparisonView))
+  }
+
+  private onComparisonViewChange(isComparisonView: boolean): void {
+    this.beforeLabel.style.display = isComparisonView ? '' : 'none'
+    this.updateLabelText()
+
+    if (isComparisonView) {
+      this.updateLabelPositions(this.slider.dragController.getPosition())
+    } else {
+      this.afterLabel.style.clipPath = 'none'
+      this.beforeLabel.style.clipPath = 'none'
+    }
   }
 
   private updateLabelText(): void {
     const { before, after } = this.config.labels!
 
-    if (!this.config.comparison) {
+    if (!this.slider.isComparisonView) {
       this.afterLabel.textContent = this.currentFilterName
     } else {
       this.beforeLabel.textContent = before

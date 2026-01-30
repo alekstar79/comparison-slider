@@ -16,6 +16,10 @@ export class FilterEngine {
   public pixelCoordinates: { x: number, y: number }[] | null = null
   public panOffset = { x: 0, y: 0 }
 
+  private currentFilter = 'none'
+  private isApplyingFilter = false
+  private filterCache = new Map<string, ImageData>()
+
   constructor(
     originalCanvas: HTMLCanvasElement,
     filteredCanvas: HTMLCanvasElement,
@@ -36,8 +40,39 @@ export class FilterEngine {
     this.redraw()
   }
 
+  private applyFilterToCanvas(canvas: HTMLCanvasElement, filter: string): HTMLCanvasElement {
+    const tempCanvas = document.createElement('canvas')
+    const tempCtx = tempCanvas.getContext('2d')!
+
+    tempCanvas.width = canvas.width
+    tempCanvas.height = canvas.height
+
+    if (filter && filter !== 'none') {
+      tempCtx.filter = filter
+    }
+
+    tempCtx.drawImage(canvas, 0, 0)
+
+    return tempCanvas
+  }
+
   public applyFilter(filter: string) {
-    this.filteredCanvas.style.filter = filter
+    if (this.isApplyingFilter) return
+    this.currentFilter = filter
+
+    if (filter === 'none') {
+      this.filteredCtx.clearRect(0, 0, this.filteredCanvas.width, this.filteredCanvas.height)
+      this.filteredCtx.drawImage(this.originalCanvas, 0, 0)
+      return
+    }
+
+    this.isApplyingFilter = true
+
+    const filteredResultCanvas = this.applyFilterToCanvas(this.originalCanvas, filter)
+    this.filteredCtx.clearRect(0, 0, this.filteredCanvas.width, this.filteredCanvas.height)
+    this.filteredCtx.drawImage(filteredResultCanvas, 0, 0)
+
+    this.isApplyingFilter = false
   }
 
   public setPanOffset(x: number, y: number) {
@@ -46,30 +81,57 @@ export class FilterEngine {
     this.redraw()
   }
 
-  public redraw() {
-    this.drawOnCanvas(this.originalCtx, this.originalImage)
-    this.drawOnCanvas(this.filteredCtx, this.originalImage)
-    this.pixelCoordinates = null // Reset pixel coordinates on redraw
+  public redraw(width?: number, height?: number) {
+    // 1. Resize and draw original canvas. This is the source of truth for size.
+    this.drawOnCanvas(this.originalCtx, this.originalImage, 0, true, width, height)
+
+    // 2. Ensure filtered canvas has the same dimensions.
+    const targetWidth = this.originalCanvas.width
+    const targetHeight = this.originalCanvas.height
+    if (this.filteredCanvas.width !== targetWidth || this.filteredCanvas.height !== targetHeight) {
+      this.filteredCanvas.width = targetWidth
+      this.filteredCanvas.height = targetHeight
+      this.filteredCanvas.style.width = this.originalCanvas.style.width
+      this.filteredCanvas.style.height = this.originalCanvas.style.height
+    }
+
+    // 3. Clear cache and apply the filter to the now correctly-sized canvases.
+    this.filterCache.clear()
+    this.pixelCoordinates = null
+    this.applyFilter(this.currentFilter)
+  }
+
+  private applyFilterToTransitionFrame() {
+    if (this.currentFilter !== 'none') {
+      const filteredFrame = this.applyFilterToCanvas(this.filteredCanvas, this.currentFilter)
+      this.filteredCtx.clearRect(0, 0, this.filteredCanvas.width, this.filteredCanvas.height)
+      this.filteredCtx.drawImage(filteredFrame, 0, 0)
+    }
   }
 
   public renderSlideTransition(fromImg: HTMLImageElement, toImg: HTMLImageElement, progress: number, direction: 'next' | 'previous') {
     renderSlideTransition(this, fromImg, toImg, progress, direction)
+    this.applyFilterToTransitionFrame()
   }
 
   public renderBlindsTransition(fromImg: HTMLImageElement, toImg: HTMLImageElement, progress: number, direction: 'next' | 'previous') {
     renderBlindsTransition(this, fromImg, toImg, progress, direction)
+    this.applyFilterToTransitionFrame()
   }
 
   public renderDissolveTransition(fromImg: HTMLImageElement, toImg: HTMLImageElement, progress: number) {
     renderDissolveTransition(this, fromImg, toImg, progress)
+    this.applyFilterToTransitionFrame()
   }
 
   public renderWipeTransition(fromImg: HTMLImageElement, toImg: HTMLImageElement, progress: number) {
     renderWipeTransition(this, fromImg, toImg, progress)
+    this.applyFilterToTransitionFrame()
   }
 
   public renderWaveTransition(fromImg: HTMLImageElement, toImg: HTMLImageElement, progress: number, direction: 'next' | 'previous') {
     renderWaveTransition(this, fromImg, toImg, progress, direction)
+    this.applyFilterToTransitionFrame()
   }
 
   public generatePixelCoordinates(): { x: number, y: number }[] {
@@ -127,15 +189,18 @@ export class FilterEngine {
     ctx: CanvasRenderingContext2D,
     image: HTMLImageElement,
     offsetX = 0,
-    clear = false
+    clear = false,
+    width?: number,
+    height?: number
   ) {
     const canvas = ctx.canvas
     const dpr = window.devicePixelRatio || 1
-    const container = canvas.parentElement!
-    const { clientWidth: containerWidth, clientHeight: containerHeight } = container
+    // Use the main slider container for sizing, not the immediate parent
+    const container = canvas.parentElement?.parentElement!
+    const containerWidth = width || container.clientWidth
+    const containerHeight = height || container.clientHeight
 
     if (containerWidth === 0 || containerHeight === 0) return
-
     if (canvas.width !== Math.floor(containerWidth * dpr) || canvas.height !== Math.floor(containerHeight * dpr)) {
       canvas.width = Math.floor(containerWidth * dpr)
       canvas.height = Math.floor(containerHeight * dpr)
