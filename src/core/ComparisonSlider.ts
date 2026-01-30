@@ -40,8 +40,7 @@ export class ComparisonSlider {
   public readonly config: UIConfig
   public isComparisonView = true
 
-  constructor(img: HTMLImageElement, config: UIConfig)
-  {
+  constructor(img: HTMLImageElement, config: UIConfig) {
     this.originalImage = img
     this.config = this.buildConfig(config)
     this.isComparisonView = this.config.comparison
@@ -110,7 +109,7 @@ export class ComparisonSlider {
 
     this.filterEngine.updateImage(this.originalImage)
     if (reset && this.isComparisonView && this.dragController) {
-      this.resetPosition()
+      this.setInitialHandlePosition()
     }
 
     this.events.emit('imageUpdate', { image: this.originalImage })
@@ -154,9 +153,7 @@ export class ComparisonSlider {
         this.events
       )
 
-      if (this.isComparisonView) {
-        this.resetPosition()
-      }
+      this.setInitialHandlePosition()
 
       const comparisonButton = this.container.querySelector('#comparisonButton')
       if (comparisonButton) {
@@ -179,7 +176,7 @@ export class ComparisonSlider {
     this.dragController.setDisabled(!this.isComparisonView)
 
     if (this.isComparisonView) {
-      this.resetPosition()
+      this.updateHandlePosition()
     }
 
     this.events.emit('comparisonViewChange', { isComparisonView: this.isComparisonView })
@@ -206,7 +203,7 @@ export class ComparisonSlider {
       this.filterEngine.redraw(width, height)
 
       if (this.isComparisonView && this.dragController) {
-        this.resetPosition()
+        this.updateHandlePosition()
       }
 
       this.events.emit('resize')
@@ -215,15 +212,21 @@ export class ComparisonSlider {
     this.resizeObserver.observe(this.container)
   }
 
-  private resetPosition() {
-    const covered = this.container.querySelector('.covered')! as HTMLElement
+  private updateHandlePosition() {
+    if (this.dragController) {
+      this.dragController.redraw()
+    }
+  }
 
+  private setInitialHandlePosition() {
+    const covered = this.container.querySelector('.covered')! as HTMLElement
     const initX = parseInt(covered.dataset.initX || '0', 10)
     const initY = parseInt(covered.dataset.initY || '0', 10)
 
-    const newX = (initX / this.originalImage.naturalWidth) * covered.clientWidth
-    const newY = (initY / this.originalImage.naturalHeight) * covered.clientHeight
+    // Convert initial pixel values from data attributes to normalized coordinates
+    const normX = initX / this.originalImage.naturalWidth
+    const normY = initY / this.originalImage.naturalHeight
 
-    this.dragController.setPosition(newX, newY)
+    this.dragController.setNormalizedPosition(normX, normY)
   }
 }

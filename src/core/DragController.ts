@@ -15,8 +15,9 @@ export class DragController {
   private isDragging = false
   private isDisabled = false
 
-  public posX = 200
-  public posY = 100
+  // Normalized coordinates (0.0 to 1.0) are the single source of truth
+  private normalizedX = 0.5
+  private normalizedY = 0.5
 
   constructor(
     boundary: HTMLElement,
@@ -35,7 +36,6 @@ export class DragController {
     this.config = config
     this.events = events
 
-    // Add direction classes to make the line and grip visible and oriented correctly
     this.handleLine.classList.add(direction)
     this.handleGrip.classList.add(direction)
 
@@ -50,24 +50,45 @@ export class DragController {
     if (disabled) {
       this.filteredCanvas.style.clipPath = 'none'
     } else {
-      this.updateClip()
+      this.redraw()
     }
   }
 
   public getPosition(): { x: number; y: number } {
-    return { x: this.posX, y: this.posY };
+    const { clientWidth, clientHeight } = this.boundary
+    return {
+      x: this.normalizedX * clientWidth,
+      y: this.normalizedY * clientHeight
+    }
   }
 
-  public setPosition(x: number, y: number) {
+  public setNormalizedPosition(normX: number, normY: number) {
+    this.normalizedX = Math.max(0, Math.min(1, normX))
+    this.normalizedY = Math.max(0, Math.min(1, normY))
+    this.redraw()
+  }
+
+  public updatePositionFromPixels(pixelX: number, pixelY: number) {
     if (this.isDisabled) return
 
     const { clientWidth, clientHeight } = this.boundary
-    this.posX = Math.max(0, Math.min(clientWidth, x))
-    this.posY = Math.max(0, Math.min(clientHeight, y))
+    if (clientWidth > 0) {
+      this.normalizedX = Math.max(0, Math.min(1, pixelX / clientWidth))
+    }
+    if (clientHeight > 0) {
+      this.normalizedY = Math.max(0, Math.min(1, pixelY / clientHeight))
+    }
 
-    this.handleGrip.style.transform = `translate(${this.posX}px, ${this.posY}px)`
-    this.scheduleUpdate()
-    this.events.emit('positionChange', { x: this.posX, y: this.posY })
+    this.redraw()
+  }
+
+  public redraw() {
+    if (this.animationFrameId) return
+
+    this.animationFrameId = requestAnimationFrame(() => {
+      this.updateClipAndHandle()
+      this.animationFrameId = null
+    })
   }
 
   private getClientPos(e: MouseEvent | TouchEvent) {
@@ -76,7 +97,7 @@ export class DragController {
 
     return {
       x: touch.clientX - rect.left,
-      y: touch.clientY - rect.top,
+      y: touch.clientY - rect.top
     }
   }
 
@@ -94,7 +115,7 @@ export class DragController {
       e.preventDefault()
 
       const { x, y } = this.getClientPos(e)
-      this.setPosition(x, y)
+      this.updatePositionFromPixels(x, y)
     }
 
     const onEnd = () => {
@@ -116,29 +137,28 @@ export class DragController {
         if (this.isDragging || this.isDisabled) return
 
         const { x, y } = this.getClientPos(e)
-        this.setPosition(x, y)
+        this.updatePositionFromPixels(x, y)
       })
     }
   }
 
-  private scheduleUpdate() {
-    if (this.animationFrameId) return
-
-    this.animationFrameId = requestAnimationFrame(() => {
-      this.updateClip()
-    })
-  }
-
-  private updateClip() {
-    this.animationFrameId = null
+  private updateClipAndHandle() {
     if (this.isDisabled) return
 
+    const { clientWidth, clientHeight } = this.boundary
+    const pixelX = this.normalizedX * clientWidth
+    const pixelY = this.normalizedY * clientHeight
+
+    this.handleGrip.style.transform = `translate(${pixelX}px, ${pixelY}px)`
+
     if (this.direction === 'horizontal') {
-      this.filteredCanvas.style.clipPath = `inset(0 calc(100% - ${this.posX}px) 0 0)`
-      this.handleLine.style.transform = `translateX(${this.posX}px)`
+      this.filteredCanvas.style.clipPath = `inset(0 calc(100% - ${pixelX}px) 0 0)`
+      this.handleLine.style.transform = `translateX(${pixelX}px)`
     } else {
-      this.filteredCanvas.style.clipPath = `inset(0 0 calc(100% - ${this.posY}px) 0)`
-      this.handleLine.style.transform = `translateY(${this.posY}px)`
+      this.filteredCanvas.style.clipPath = `inset(0 0 calc(100% - ${pixelY}px) 0)`
+      this.handleLine.style.transform = `translateY(${pixelY}px)`
     }
+
+    this.events.emit('positionChange', { x: pixelX, y: pixelY })
   }
 }

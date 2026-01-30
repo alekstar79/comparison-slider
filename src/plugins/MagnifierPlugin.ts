@@ -290,8 +290,7 @@ export class MagnifierPlugin implements Plugin {
 
       // 2. Calculate clipping region for the filtered part, if dragController exists
       if (this.slider.dragController) {
-        const handleX = this.slider.dragController.posX
-        const handleY = this.slider.dragController.posY
+        const { x: handleX, y: handleY } = this.slider.dragController.getPosition()
 
         const direction = coveredEl.dataset.direction as 'horizontal' | 'vertical'
         const handlePosition = direction === 'horizontal' ? handleX : handleY
@@ -484,6 +483,7 @@ export class MagnifierPlugin implements Plugin {
         this.ctx.rect(dx, dy + clampedClipY * this.currentZoom, dWidth, dHeight - clampedClipY * this.currentZoom)
       }
     }
+
     this.ctx.clip()
   }
 }
