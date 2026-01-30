@@ -141,16 +141,6 @@ export class ComparisonSlider {
     }
 
     this.filterEngine = new FilterEngine(originalCanvas, filteredCanvas, this.originalImage)
-    this.dragController = new DragController(
-      covered,
-      handleGrip,
-      handleLine,
-      filteredCanvas,
-      direction,
-      this.config,
-      this.events
-    )
-
     if (this.config.comparison) {
       this.dragController = new DragController(
         covered,
