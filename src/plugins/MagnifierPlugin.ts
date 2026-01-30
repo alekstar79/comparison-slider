@@ -386,12 +386,14 @@ export class MagnifierPlugin implements Plugin {
       )
 
       this.ctx.beginPath()
+
       if (isCircular) {
         this.ctx.arc(dx + dWidth / 2, dy + dHeight / 2, dWidth / 2, 0, 2 * Math.PI)
       } else {
         const borderRadius = parseFloat(styles.borderRadius) * zoom
         this.ctx.roundRect(dx, dy, dWidth, dHeight, borderRadius)
       }
+
       this.ctx.fill()
 
       const borderWidth = parseFloat(styles.borderWidth)
@@ -406,7 +408,8 @@ export class MagnifierPlugin implements Plugin {
       const after = getComputedStyle(htmlEl, '::after')
 
       if (svgEl) {
-        const color = styles.color
+        const svgStyles = getComputedStyle(svgEl)
+        const color = svgStyles.color
         const svgString = svgEl.outerHTML.replace(/currentColor/g, color)
 
         let cachedImage = this.iconCache.get(svgString)
@@ -419,10 +422,22 @@ export class MagnifierPlugin implements Plugin {
         }
 
         if (cachedImage.complete && cachedImage.naturalWidth > 0) {
-          const iconSize = dWidth * 0.55
-          const iconX = dx + (dWidth - iconSize) / 2
-          const iconY = dy + (dHeight - iconSize) / 2
-          this.ctx.drawImage(cachedImage, iconX, iconY, iconSize, iconSize)
+          const isGrip = htmlEl.classList.contains('handle-grip')
+          const iconRatio = isGrip ? 1 : 0.55
+          const iconSize = dWidth * iconRatio
+
+          this.ctx.save()
+
+          const centerX = dx + dWidth / 2
+          const centerY = dy + dHeight / 2
+          this.ctx.translate(centerX, centerY)
+
+          if (isGrip && htmlEl.classList.contains('vertical')) {
+            this.ctx.rotate(Math.PI / 2) // 90 degrees
+          }
+
+          this.ctx.drawImage(cachedImage, -iconSize / 2, -iconSize / 2, iconSize, iconSize)
+          this.ctx.restore()
         }
       } else if (after.content && after.content !== 'none' && after.content !== '""') {
         const text = after.content.replace(/['"]/g, '')

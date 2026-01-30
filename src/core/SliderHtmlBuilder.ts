@@ -68,9 +68,11 @@ export class SliderHtmlBuilder {
       <div class="comparison-label label-before"></div>
     `
 
+    const handleGripHtml = `<div class="handle-grip">${config.handle?.gripIconSvg || ''}</div>`
+
     container.className = `slider-container ${img.className}`
     container.style.aspectRatio = `${img.naturalWidth} / ${img.naturalHeight}`
-    container.innerHTML = coveredContent + uiElementsHtml + labelsHtml + `<div class="handle-grip"></div>`
+    container.innerHTML = coveredContent + uiElementsHtml + labelsHtml + handleGripHtml
 
     const parent = img.parentNode!
 

@@ -64,6 +64,9 @@ export interface UIConfig {
   pan?: {
     allowedRatioDeviation: number;
   };
+  handle?: {
+    gripIconSvg?: string;
+  };
 }
 
 export const defaultConfig: UIConfig = {
@@ -166,5 +169,8 @@ export const defaultConfig: UIConfig = {
   },
   pan: {
     allowedRatioDeviation: 0.1
+  },
+  handle: {
+    gripIconSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M9 8L5 12l4 4M15 16l4-4-4-4"/></svg>'
   }
 }
