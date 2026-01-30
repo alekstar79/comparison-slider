@@ -239,6 +239,18 @@ h2 {
   z-index: 3;
 }
 
+/* --- Single View Mode --- */
+.mode-single-view .handle-line,
+.mode-single-view .handle-grip,
+.mode-single-view .original-canvas {
+  display: none;
+}
+
+.mode-single-view .filtered-canvas {
+  clip-path: none !important;
+}
+
+
 @media (max-width: 850px) {
   body {
     padding: 10px;

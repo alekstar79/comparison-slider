@@ -38,6 +38,7 @@ export interface UIBlock {
 }
 
 export interface UIConfig {
+  comparison: boolean;
   plugins: { new (slider: any, config: UIConfig, events: EventEmitter): Plugin }[];
   uiBlocks: UIBlock[];
   hoverToSlide?: boolean;
@@ -51,7 +52,6 @@ export interface UIConfig {
   labels?: {
     before: string;
     after: string;
-    position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   };
   magnifier: {
     button: string;
@@ -65,6 +65,7 @@ export interface UIConfig {
 }
 
 export const defaultConfig: UIConfig = {
+  comparison: false,
   plugins: [
     FilterPlugin,
     FullscreenPlugin,
@@ -149,8 +150,7 @@ export const defaultConfig: UIConfig = {
   },
   labels: {
     before: 'Original',
-    after: 'Filtered',
-    position: 'top-left'
+    after: 'Filtered'
   },
   magnifier: {
     button: '#magnifierButton',

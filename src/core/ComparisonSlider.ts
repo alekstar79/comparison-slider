@@ -106,7 +106,7 @@ export class ComparisonSlider {
     }
 
     this.filterEngine.updateImage(this.originalImage)
-    if (reset) {
+    if (reset && this.config.comparison) {
       this.resetPosition()
     }
 
@@ -136,6 +136,9 @@ export class ComparisonSlider {
     const direction = covered.dataset.direction as 'horizontal' | 'vertical'
 
     this.container.classList.add(direction)
+    if (!this.config.comparison) {
+      this.container.classList.add('mode-single-view')
+    }
 
     this.filterEngine = new FilterEngine(originalCanvas, filteredCanvas, this.originalImage)
     this.dragController = new DragController(
@@ -148,7 +151,20 @@ export class ComparisonSlider {
       this.events
     )
 
-    this.resetPosition()
+    if (this.config.comparison) {
+      this.dragController = new DragController(
+        covered,
+        handleGrip,
+        handleLine,
+        filteredCanvas,
+        direction,
+        this.config,
+        this.events
+      )
+
+      this.resetPosition()
+    }
+
     this.plugins.forEach(plugin => plugin.initialize())
     this.setupResizeObserver()
   }
@@ -168,7 +184,11 @@ export class ComparisonSlider {
   private setupResizeObserver() {
     this.resizeObserver = new ResizeObserver(() => {
       this.filterEngine.redraw()
-      this.resetPosition()
+
+      if (this.config.comparison) {
+        this.resetPosition()
+      }
+
       this.events.emit('resize')
     })
 

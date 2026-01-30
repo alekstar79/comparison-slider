@@ -30,32 +30,48 @@ export class LabelPlugin implements Plugin {
 
     if (!this.afterLabel || !this.beforeLabel) return
 
-    // Fix for initialization bug: get the initial filter name on startup
+    // In single view mode, just hide the 'before' label. CSS handles the rest.
+    if (!this.config.comparison) {
+      this.beforeLabel.style.display = 'none'
+    }
+
     const initialActiveButton = this.slider.container.querySelector('.filter-buttons button.active')
     if (initialActiveButton) {
       this.currentFilterName = initialActiveButton.textContent || ''
     }
 
     this.updateLabelText()
-    this.updateLabelPositions(this.slider.dragController.getPosition())
 
-    this.events.on('positionChange', (pos: { x: number, y: number }) => this.updateLabelPositions(pos))
+    if (this.config.comparison) {
+      this.updateLabelPositions(this.slider.dragController.getPosition())
+      this.events.on('positionChange', (pos: { x: number, y: number }) => {
+        this.updateLabelPositions(pos)
+      })
+    }
+
     this.events.on('filterChange', (filter: { name: string, value: string }) => {
       this.currentFilterName = filter.name
       this.updateLabelText()
     })
 
     this.events.on('resize', () => {
-      this.updateLabelPositions(this.slider.dragController.getPosition())
+      if (this.config.comparison) {
+        this.updateLabelPositions(this.slider.dragController.getPosition())
+      }
     })
   }
 
   private updateLabelText(): void {
     const { before, after } = this.config.labels!
-    const afterText = this.currentFilterName ? this.currentFilterName : after
 
-    this.beforeLabel.textContent = before
-    this.afterLabel.textContent = afterText
+    if (!this.config.comparison) {
+      this.afterLabel.textContent = this.currentFilterName
+    } else {
+      this.beforeLabel.textContent = before
+      this.afterLabel.textContent = this.currentFilterName
+        ? this.currentFilterName
+        : after
+    }
   }
 
   private updateLabelPositions({ x, y }: { x: number, y: number }): void {

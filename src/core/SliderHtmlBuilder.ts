@@ -37,6 +37,14 @@ export class SliderHtmlBuilder {
             )
           }
 
+          // If not in comparison mode, ensure an "Original" filter option exists
+          if (!config.comparison) {
+            const hasOriginal = filtersToRender.some(f => f.value === 'none')
+            if (!hasOriginal) {
+              filtersToRender.unshift({ name: 'Original', value: 'none' })
+            }
+          }
+
           buttonsHtml = filtersToRender.map(filterDef =>
             `<button data-filter="${filterDef.value}">${filterDef.name}</button>`
           ).join('')
