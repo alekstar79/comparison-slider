@@ -52,7 +52,7 @@ export class LabelPlugin implements Plugin {
 
   private updateLabelText(): void {
     const { before, after } = this.config.labels!
-    const afterText = this.currentFilterName ? `${after}: ${this.currentFilterName}` : after
+    const afterText = this.currentFilterName ? this.currentFilterName : after
 
     this.beforeLabel.textContent = before
     this.afterLabel.textContent = afterText
