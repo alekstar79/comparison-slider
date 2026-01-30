@@ -1,5 +1,5 @@
-import { UIConfig } from '../config'
-import { FILTERS } from '../filters'
+import type { UIConfig } from '../config'
+import { FILTERS } from '@/filters'
 
 import { FilterPlugin } from '../plugins/FilterPlugin'
 import { FullscreenPlugin } from '../plugins/FullscreenPlugin'

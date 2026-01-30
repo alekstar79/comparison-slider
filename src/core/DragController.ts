@@ -1,5 +1,5 @@
 import { EventEmitter } from './EventEmitter'
-import { UIConfig } from '../config'
+import type { UIConfig } from '../config'
 
 export class DragController {
   private readonly events: EventEmitter

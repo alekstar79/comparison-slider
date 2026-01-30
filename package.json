@@ -1,34 +1,60 @@
 {
-  "name": "image-comparison-slider-ts",
+  "name": "@alekstar79/comparison-slider-ts",
   "private": false,
   "version": "1.0.0",
   "type": "module",
-  "main": "./dist/main.js",
-  "module": "./dist/main.js",
-  "exports": {
-    ".": {
-      "import": "./dist/main.js"
-    },
-    "./plugins/*": {
-      "import": "./dist/plugins/*.js"
-    },
-    "./styles/*": {
-      "import": "./dist/styles/*.css"
-    }
+  "main": "./lib/index.js",
+  "module": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "license": "MIT",
+  "author": "Aleksey Tarasenko <alekstar79@yandex.ru>",
+  "homepage": "https://github.com/alekstar79/comparison-slider.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alekstar79/comparison-slider.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alekstar79/comparison-slider/issues"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js",
+      "default": "./lib/index.js"
+    },
+    "./plugins/*": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js"
+    },
+    "./styles/*": {
+      "import": "./lib/styles/*.css"
+    }
+  },
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "yarn build:lib && vite -c vite.config.ts build",
+    "build:lib": "tsc && vite -c vite.lib.config.ts build",
     "preview": "vite preview"
   },
   "devDependencies": {
     "@types/glob": "^9.0.0",
     "@types/node": "^25.0.10",
     "glob": "^13.0.0",
-    "typescript": "^5.9.3",
-    "vite": "^7.3.1"
+    "typescript": "^5.3.3",
+    "vite": "^7.3.1",
+    "vite-plugin-dts": "^4.5.4"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   }
 }

@@ -1,0 +1,33 @@
+.comparison-label {
+  position: absolute;
+  padding: 7px 16px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+  pointer-events: none;
+  white-space: nowrap;
+  user-select: none;
+  z-index: 5;
+}
+
+/* Positioning for Horizontal Mode */
+.slider-container.horizontal .label-after {
+  top: 10px;
+  left: 10px;
+}
+.slider-container.horizontal .label-before {
+  top: 10px;
+  right: 10px;
+}
+
+/* Positioning for Vertical Mode */
+.slider-container.vertical .label-after {
+  top: 10px;
+  left: 10px;
+}
+.slider-container.vertical .label-before {
+  bottom: 10px;
+  left: 10px;
+}
