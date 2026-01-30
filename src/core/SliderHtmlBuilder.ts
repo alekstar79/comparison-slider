@@ -1,9 +1,14 @@
 import { UIConfig } from '../config'
 import { FILTERS } from '../filters'
 
-export class SliderHtmlBuilder {
-  public static readonly ALL_FILTERS = FILTERS
+import { FilterPlugin } from '../plugins/FilterPlugin'
+import { FullscreenPlugin } from '../plugins/FullscreenPlugin'
+import { LabelPlugin } from '../plugins/LabelPlugin'
+import { LoadImagePlugin } from '../plugins/LoadImagePlugin'
+import { MagnifierPlugin } from '../plugins/MagnifierPlugin'
+import { SavePlugin } from '../plugins/SavePlugin'
 
+export class SliderHtmlBuilder {
   static enhanceImage(img: HTMLImageElement, config: UIConfig): HTMLElement {
     const container = document.createElement('div')
     const direction = (img.dataset.direction as 'horizontal' | 'vertical') || 'horizontal'
@@ -21,29 +26,31 @@ export class SliderHtmlBuilder {
       <div class="handle-line"></div>
     </div>`
 
+    const activePluginSet = new Set(config.plugins.map(p => p.name))
+
     let uiElementsHtml = ''
+    // Filter out navButtons, as they are handled by ImageSetPlugin itself
     config.uiBlocks
       .filter(block => block.id !== 'navButtons')
       .forEach(block => {
-        let buttonsHtml: string
+        let buttonsHtml = ''
         if (block.id === 'filterPanel') {
+          if (!activePluginSet.has(FilterPlugin.name)) return
+
           const filterNamesStr = img.dataset.filters || 'Grayscale,Blur,Invert,Bright'
           const filterNames = filterNamesStr.split(',').map(name => name.trim())
 
-          let filtersToRender = SliderHtmlBuilder.ALL_FILTERS
+          let filtersToRender = FILTERS
           if (!filterNames.includes('all') && !filterNames.includes('*')) {
-            filtersToRender = SliderHtmlBuilder.ALL_FILTERS.filter(filterDef =>
+            filtersToRender = FILTERS.filter(filterDef =>
               filterNames.some(name => name.trim() === filterDef.name)
             )
           }
 
-          // If in comparison mode, ensure "Original" filter is NOT present initially
           if (config.comparison) {
             filtersToRender = filtersToRender.filter(f => f.value !== 'none')
           } else {
-            // If not in comparison mode, ensure an "Original" filter option exists
-            const hasOriginal = filtersToRender.some(f => f.value === 'none')
-            if (!hasOriginal) {
+            if (!filtersToRender.some(f => f.value === 'none')) {
               filtersToRender.unshift({ name: 'Original', value: 'none' })
             }
           }
@@ -52,21 +59,33 @@ export class SliderHtmlBuilder {
             `<button data-filter="${filterDef.value}">${filterDef.name}</button>`
           ).join('')
 
-          uiElementsHtml += `<div class="ui-panel" id="${block.id}">
-            <div class="filter-buttons">${buttonsHtml}</div>
-          </div>`
+          uiElementsHtml += `<div class="ui-panel" id="${block.id}"><div class="filter-buttons">${buttonsHtml}</div></div>`
         } else {
-          buttonsHtml = block.buttons.map(button =>
+          const filteredButtons = block.buttons.filter(button => {
+            if (button.id === 'comparisonButton') return config.comparison
+            if (button.id === 'fullscreenButton') return activePluginSet.has(FullscreenPlugin.name)
+            if (button.id === 'magnifierButton') return activePluginSet.has(MagnifierPlugin.name)
+            if (button.id === 'saveButton') return activePluginSet.has(SavePlugin.name)
+            if (button.id === 'toggleButton') return activePluginSet.has(FilterPlugin.name)
+            if (button.id === 'uploadButton') return activePluginSet.has(LoadImagePlugin.name)
+            return true
+          })
+
+          if (filteredButtons.length === 0) return
+
+          buttonsHtml = filteredButtons.map(button =>
             `<button ${button.id ? `id="${button.id}"` : ''} ${button.class ? `class="${button.class}"` : ''}>${button.iconSvg || button.text}</button>`
           ).join('')
-          uiElementsHtml += `<div id="${block.id}" ${block.class ? `class="${block.class}"` : `class="ui-block ${block.direction}`}">${buttonsHtml}</div>`
+
+          if (buttonsHtml) {
+            uiElementsHtml += `<div id="${block.id}" ${block.class ? `class="${block.class}"` : `class="ui-block ${block.direction}`}">${buttonsHtml}</div>`
+          }
         }
       })
 
-    const labelsHtml = `
-      <div class="comparison-label label-after"></div>
-      <div class="comparison-label label-before"></div>
-    `
+    const labelsHtml = activePluginSet.has(LabelPlugin.name)
+      ? `<div class="comparison-label label-after"></div><div class="comparison-label label-before"></div>`
+      : ''
 
     const handleGripHtml = `<div class="handle-grip">${config.handle?.gripIconSvg || ''}</div>`
 
@@ -75,11 +94,9 @@ export class SliderHtmlBuilder {
     container.innerHTML = coveredContent + uiElementsHtml + labelsHtml + handleGripHtml
 
     const parent = img.parentNode!
-
     parent.insertBefore(container, img)
     parent.removeChild(img)
 
-    // Apply block positions from config
     config.uiBlocks.forEach(block => {
       const blockElement = container.querySelector(`#${block.id}`) as HTMLElement
       if (blockElement && block.position) {

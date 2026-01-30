@@ -96,6 +96,12 @@ export class ImageSetPlugin implements Plugin {
         this.startAutoplay()
       }
     })
+
+    this.events.on('imageUpdate', ({ image }) => {
+      if (this.images.length > 0) {
+        this.images[this.currentIndex] = image
+      }
+    })
   }
 
   private async navigate(direction: 'next' | 'prev') {
