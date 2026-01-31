@@ -7,7 +7,7 @@ vi.stubGlobal('ResizeObserver', vi.fn(() => ({
   disconnect: vi.fn()
 })))
 
-// FIX for Pointer Events API
+// Fix for Pointer Events API
 if (typeof PointerEvent === 'undefined') {
   // @ts-ignore
   global.PointerEvent = class PointerEvent extends MouseEvent {
@@ -28,7 +28,7 @@ if (!Element.prototype.releasePointerCapture) {
   Element.prototype.releasePointerCapture = vi.fn()
 }
 
-// FIX for getComputedStyle
+// Fix for getComputedStyle
 const mockComputedStyle = {
   backgroundColor: 'rgba(0, 0, 0, 0.5)',
   opacity: '1',
@@ -42,7 +42,7 @@ const mockComputedStyle = {
 }
 vi.stubGlobal('getComputedStyle', vi.fn(() => mockComputedStyle))
 
-// FIX for Path2D
+// Fix for Path2D
 vi.stubGlobal('Path2D', class Path2D {
   rect = vi.fn()
   arc = vi.fn()
@@ -51,7 +51,6 @@ vi.stubGlobal('Path2D', class Path2D {
   closePath = vi.fn()
   arcTo = vi.fn()
 })
-
 
 // THE FINAL CORRECT IMAGE MOCK
 const srcStore = new WeakMap()

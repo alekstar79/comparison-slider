@@ -43,7 +43,7 @@ describe('ImageSetPlugin', () => {
         renderBlindsTransition: vi.fn(),
         renderWipeTransition: vi.fn(),
         renderWaveTransition: vi.fn()
-      }
+      } as any
     }
   })
 
@@ -135,21 +135,22 @@ describe('ImageSetPlugin', () => {
     const plugin = new ImageSetPlugin(sliderMock as ComparisonSlider, config, events)
     await plugin.initialize()
 
-    let animationCallback: FrameRequestCallback | null = null;
+    let animationCallback: FrameRequestCallback | null = null
     rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
-      animationCallback = cb;
-      return 0;
-    });
+      animationCallback = cb
+      return 0
+    })
 
     const nextButton = container.querySelector('.nav-button.next') as HTMLButtonElement
     nextButton.click()
 
-    expect(animationCallback).not.toBeNull();
+    expect(animationCallback).not.toBeNull()
+
     // Simulate animation loop until completion
-    while (animationCallback) {
-      const cb = animationCallback;
-      animationCallback = null; // Prevent infinite loop if logic doesn't clear it
-      cb(performance.now() + 500); // Simulate time passing
+    for (let i = 0; i < 10 && animationCallback; i++) { // Safety break after 10 frames
+      const cb: FrameRequestCallback = animationCallback
+      animationCallback = null // Prevent infinite loop if logic doesn't clear it
+      cb(performance.now() + 500 * (i + 1))
     }
 
     expect(sliderMock.updateImage).toHaveBeenCalledWith(preloadedImages[1], false)
@@ -196,18 +197,19 @@ describe('ImageSetPlugin', () => {
     await plugin.initialize()
     const renderSpy = sliderMock.filterEngine![renderFn as keyof typeof sliderMock.filterEngine]
 
-    let animationCallback: FrameRequestCallback | null = null;
+    let animationCallback: FrameRequestCallback | null = null
     rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
-      animationCallback = cb;
-      return 0;
-    });
+      animationCallback = cb
+      return 0
+    })
 
     const nextButton = container.querySelector('.nav-button.next') as HTMLButtonElement
     nextButton.click()
 
-    expect(animationCallback).not.toBeNull();
+    expect(animationCallback).not.toBeNull()
     if (animationCallback) {
-      animationCallback(performance.now());
+      // @ts-ignore
+      animationCallback(performance.now())
     }
 
     expect(renderSpy).toHaveBeenCalled()

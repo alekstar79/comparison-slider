@@ -1,4 +1,4 @@
-export type { UIConfig, Plugin } from './config'
+export type { UIConfig, UIBlock, UIButton, Plugin } from './config'
 
 export { FilterPlugin } from './plugins/FilterPlugin'
 export { FullscreenPlugin } from './plugins/FullscreenPlugin'

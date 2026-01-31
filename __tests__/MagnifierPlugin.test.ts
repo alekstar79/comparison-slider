@@ -50,15 +50,16 @@ describe('MagnifierPlugin', () => {
       filterEngine: {
         originalCanvas: container.querySelector('.original-canvas')!,
         filteredCanvas: container.querySelector('.filtered-canvas')!
-      },
+      } as any,
       dragController: {
         getPosition: vi.fn().mockReturnValue({ x: 400, y: 300 })
-      }
+      } as any
     }
   })
 
   afterEach(() => {
     vi.useRealTimers()
+    vi.restoreAllMocks()
   })
 
   it('should initialize, create elements, and bind events', () => {
@@ -117,6 +118,15 @@ describe('MagnifierPlugin', () => {
     expect(magnifierEl.style.display).toBe('none')
   })
 
+  it('should not hide on mouseleave if not enabled', () => {
+    const plugin = new MagnifierPlugin(sliderMock as ComparisonSlider, config, events)
+    plugin.initialize()
+
+    const hideSpy = vi.spyOn(plugin as any, 'hide')
+    container.dispatchEvent(new MouseEvent('mouseleave'))
+    expect(hideSpy).not.toHaveBeenCalled()
+  })
+
   it('should call drawUIElements on update', () => {
     const plugin = new MagnifierPlugin(sliderMock as ComparisonSlider, config, events)
     plugin.initialize()
@@ -128,6 +138,10 @@ describe('MagnifierPlugin', () => {
   })
 
   it('should use Path2D for clipping if container has border-radius', () => {
+    vi.spyOn(window, 'getComputedStyle').mockReturnValue({
+      borderRadius: '10px'
+    } as any)
+
     const plugin = new MagnifierPlugin(sliderMock as ComparisonSlider, config, events)
     plugin.initialize()
     plugin['setZoom'](2)
@@ -368,6 +382,45 @@ describe('MagnifierPlugin', () => {
       expect(fillTextSpy).toHaveBeenCalledWith('Hello', expect.any(Number), expect.any(Number))
     })
 
+    it('should draw text from ::after pseudo-element', () => {
+      const pseudoButton = document.createElement('button')
+      container.querySelector('.ui-block')!.appendChild(pseudoButton)
+      Object.defineProperty(pseudoButton, 'getBoundingClientRect', {
+        value: () => ({ left: 90, top: 90, width: 40, height: 20 }),
+      })
+
+      const originalGetComputedStyle = window.getComputedStyle
+      vi.spyOn(window, 'getComputedStyle').mockImplementation((elt, pseudo) => {
+        if (elt === pseudoButton && pseudo === '::after') {
+          return {
+            content: '"Pseudo"',
+            fontSize: '12px',
+            fontFamily: 'Arial',
+            color: 'rgb(255, 0, 0)',
+          } as any
+        }
+        if (elt === pseudoButton) {
+          return {
+            opacity: '1',
+            display: 'block',
+            backgroundColor: 'rgb(0,0,0)',
+            borderWidth: '0px',
+            borderRadius: '0px',
+            color: 'rgb(0,0,0)',
+            fontSize: '12px',
+            fontFamily: 'Arial',
+          } as any
+        }
+        return originalGetComputedStyle(elt, pseudo)
+      })
+
+      const fillTextSpy = vi.spyOn(ctx, 'fillText')
+
+      plugin['drawUIElements'](100, 100)
+
+      expect(fillTextSpy).toHaveBeenCalledWith('Pseudo', expect.any(Number), expect.any(Number))
+    })
+
     it('should clip "label-after" correctly in horizontal mode', () => {
       const label = document.createElement('div')
       label.classList.add('comparison-label', 'label-after')
@@ -385,24 +438,101 @@ describe('MagnifierPlugin', () => {
       expect(rectSpy).toHaveBeenCalledWith(expect.any(Number), expect.any(Number), 100, 60)
     })
 
-    it('should not draw elements with zero opacity or size', () => {
-      const transparentButton = document.createElement('button')
-      transparentButton.style.opacity = '0'
-      Object.defineProperty(transparentButton, 'getBoundingClientRect', {
-        value: () => ({ left: 20, top: 20, width: 40, height: 20 }),
+    it('should clip "label-before" correctly in horizontal mode', () => {
+      const label = document.createElement('div')
+      label.classList.add('comparison-label', 'label-before')
+      container.appendChild(label)
+      Object.defineProperty(label, 'getBoundingClientRect', {
+        value: () => ({ left: 250, top: 10, width: 100, height: 30 }),
       })
-      container.appendChild(transparentButton)
+      sliderMock.dragController!.getPosition = () => ({ x: 300, y: 300 })
+      const rectSpy = vi.spyOn(ctx, 'rect')
+
+      plugin['drawUIElements'](280, 20)
+
+      expect(rectSpy).toHaveBeenCalledWith(expect.any(Number), expect.any(Number), 100, 60)
+    })
+
+    it('should clip "label-after" correctly in vertical mode', () => {
+      const coveredEl = container.querySelector('.covered') as HTMLElement
+      coveredEl.dataset.direction = 'vertical'
+      const label = document.createElement('div')
+      label.classList.add('comparison-label', 'label-after')
+      container.appendChild(label)
+      Object.defineProperty(label, 'getBoundingClientRect', {
+        value: () => ({ left: 10, top: 250, width: 100, height: 30 }),
+      })
+      sliderMock.dragController!.getPosition = () => ({ x: 400, y: 300 })
+      const rectSpy = vi.spyOn(ctx, 'rect')
+
+      plugin['drawUIElements'](20, 260)
+
+      expect(rectSpy).toHaveBeenCalledWith(expect.any(Number), expect.any(Number), 200, 60)
+    })
+
+    it('should clip "label-before" correctly in vertical mode', () => {
+      const coveredEl = container.querySelector('.covered') as HTMLElement
+      coveredEl.dataset.direction = 'vertical'
+      const label = document.createElement('div')
+      label.classList.add('comparison-label', 'label-before')
+      container.appendChild(label)
+      Object.defineProperty(label, 'getBoundingClientRect', {
+        value: () => ({ left: 10, top: 250, width: 100, height: 30 }),
+      })
+      sliderMock.dragController!.getPosition = () => ({ x: 400, y: 280 })
+      const rectSpy = vi.spyOn(ctx, 'rect')
+
+      plugin['drawUIElements'](20, 260)
+
+      // dHeight = 30 * 2 = 60
+      // clipY = 280 - 250 = 30
+      // clampedClipY = 30
+      // zoomedClampedClipY = 30 * 2 = 60
+      // expected height = 60 - 60 = 0
+      expect(rectSpy).toHaveBeenCalledWith(expect.any(Number), expect.any(Number), 200, 0)
+    })
+
+    it('should not draw elements outside the magnifier bounds', () => {
+      const outsideButton = document.createElement('button')
+      container.querySelector('.ui-block')!.appendChild(outsideButton)
+      Object.defineProperty(outsideButton, 'getBoundingClientRect', {
+        value: () => ({ left: 1000, top: 1000, width: 40, height: 20 }),
+      })
+      const fillSpy = vi.spyOn(ctx, 'fill')
+
+      plugin['drawUIElements'](20, 20)
+
+      expect(fillSpy).toHaveBeenCalledTimes(1)
+    })
+
+    it('should not draw elements with zero size or display:none', () => {
+      const uiBlock = container.querySelector('.ui-block')!
 
       const zeroSizeButton = document.createElement('button')
+      uiBlock.appendChild(zeroSizeButton)
       Object.defineProperty(zeroSizeButton, 'getBoundingClientRect', {
-        value: () => ({ width: 0, height: 0 }),
+        value: () => ({ left: 30, top: 30, width: 0, height: 0 }),
       })
-      container.appendChild(zeroSizeButton)
+
+      const hiddenButton = document.createElement('button')
+      uiBlock.appendChild(hiddenButton)
+      Object.defineProperty(hiddenButton, 'getBoundingClientRect', {
+        value: () => ({ left: 20, top: 20, width: 40, height: 20 }),
+      })
+
+      const originalGetComputedStyle = window.getComputedStyle
+      vi.spyOn(window, 'getComputedStyle').mockImplementation((elt, pseudo) => {
+        if (elt === hiddenButton) {
+          return { display: 'none' } as any
+        }
+        return originalGetComputedStyle(elt, pseudo)
+      })
 
       const fillSpy = vi.spyOn(ctx, 'fill')
 
       plugin['drawUIElements'](25, 25)
 
+      // Only magnifierButton should be drawn
       expect(fillSpy).toHaveBeenCalledTimes(1)
     })
   })

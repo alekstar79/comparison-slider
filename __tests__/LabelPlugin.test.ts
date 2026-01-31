@@ -48,7 +48,7 @@ describe('LabelPlugin', () => {
       isComparisonView: true,
       dragController: {
         getPosition: vi.fn().mockReturnValue({ x: 400, y: 300 })
-      }
+      } as any
     }
   })
 

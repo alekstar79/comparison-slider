@@ -37,7 +37,7 @@ describe('FilterPlugin', () => {
       config,
       filterEngine: {
         applyFilter: vi.fn()
-      }
+      } as any
     }
   })
 

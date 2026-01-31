@@ -35,7 +35,7 @@ describe('ImagePanPlugin', () => {
         setPanOffset: vi.fn(),
         originalCanvas: document.createElement('canvas'),
         filteredCanvas: document.createElement('canvas')
-      }
+      } as any
     }
 
     plugin = new ImagePanPlugin(sliderMock as ComparisonSlider, config, events)

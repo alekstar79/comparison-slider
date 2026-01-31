@@ -1,13 +1,13 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { SliderHtmlBuilder } from '../src/core/SliderHtmlBuilder'
-import { type ComparisonSlider, defaultConfig, FilterPlugin } from '../src'
+import { type UIBlock, type ComparisonSlider, defaultConfig, FilterPlugin } from '../src'
 
 describe('SliderHtmlBuilder', () => {
   let img: HTMLImageElement
   let sliderMock: Partial<ComparisonSlider>
 
   beforeEach(() => {
-    document.body.innerHTML = '<div id="parent"><img id="test-img" class="my-class" data-direction="vertical" /></div>'
+    document.body.innerHTML = '<div id="parent"><img id="test-img" class="my-class" data-direction="vertical" alt="" src=""/></div>'
     img = document.getElementById('test-img') as HTMLImageElement
     Object.defineProperties(img, {
       naturalWidth: { value: 800, configurable: true },
@@ -63,9 +63,9 @@ describe('SliderHtmlBuilder', () => {
       id: 'testBlock',
       direction: 'horizontal',
       buttons: [{ id: 'saveButton', iconSvg: '...' }]
-    }]
+    } as UIBlock]
     // Ensure the SavePlugin is NOT in the plugins array
-    sliderMock.plugins = []
+    Object.defineProperty(sliderMock, 'plugins', { value: [], configurable: true })
 
     const container = SliderHtmlBuilder.enhanceImage(img, sliderMock as ComparisonSlider)
     const testBlock = container.querySelector('#testBlock')

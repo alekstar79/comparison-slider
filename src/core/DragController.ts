@@ -103,7 +103,8 @@ export class DragController {
 
   private bindEvents() {
     const onStart = (e: MouseEvent | TouchEvent) => {
-      if (this.isDisabled) return
+      if (this.isDisabled || 'button' in e && e.button !== 0 || 'touches' in e && e.touches.length > 1) return
+
       e.preventDefault()
 
       this.isDragging = true

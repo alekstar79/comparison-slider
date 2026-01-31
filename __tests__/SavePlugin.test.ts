@@ -10,7 +10,7 @@ describe('SavePlugin', () => {
 
   // Mock link click and toDataURL
   const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
-  const toDataURLSpy = vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue('data:image/png;base64,test')
+  vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue('data:image/png;base64,test')
 
   beforeEach(() => {
     vi.clearAllMocks()
