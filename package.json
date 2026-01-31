@@ -40,22 +40,24 @@
       "types": "./lib/plugins/*.d.ts",
       "import": "./lib/plugins/*.js"
     },
-    "./styles/*": {
-      "import": "./lib/styles/*.css"
-    }
+    "./style.css": "./lib/styles/style.css",
+    "./plugins/SavePlugin.css": "./lib/styles/SavePlugin.css",
+    "./plugins/LabelPlugin.css": "./lib/styles/LabelPlugin.css",
+    "./plugins/FilterPlugin.css": "./lib/styles/FilterPlugin.css",
+    "./plugins/MagnifierPlugin.css": "./lib/styles/MagnifierPlugin.css"
   },
   "scripts": {
     "dev": "vite",
     "build": "yarn build:lib && vite -c vite.config.ts build",
-    "build:lib": "tsc && vite -c vite.lib.config.ts build",
+    "build:lib": "vite -c vite.lib.config.ts build",
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@types/node": "^25.0.10",
+    "@types/node": "^20.12.12",
     "glob": "^13.0.0",
-    "typescript": "~5.8.2",
-    "vite": "^7.3.1",
-    "vite-plugin-dts": "^4.5.4"
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11",
+    "vite-plugin-dts": "^3.9.1"
   },
   "engines": {
     "node": ">=18.0.0",
