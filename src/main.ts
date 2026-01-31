@@ -1,8 +1,12 @@
-import '@/styles/style.css'
+import '@/styles/core.css'
 import '@/styles/FilterPlugin.css'
+import '@/styles/FullscreenPlugin.css'
+import '@/styles/ImagePanPlugin.css'
+import '@/styles/ImageSetPlugin.css'
 import '@/styles/LabelPlugin.css'
 import '@/styles/MagnifierPlugin.css'
 import '@/styles/SavePlugin.css'
+import '@/styles/style.css'
 
 import { FilterPlugin } from '@/plugins/FilterPlugin'
 import { FullscreenPlugin } from '@/plugins/FullscreenPlugin'

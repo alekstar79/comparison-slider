@@ -40,11 +40,14 @@
       "types": "./lib/plugins/*.d.ts",
       "import": "./lib/plugins/*.js"
     },
-    "./style.css": "./lib/styles/style.css",
-    "./plugins/SavePlugin.css": "./lib/styles/SavePlugin.css",
-    "./plugins/LabelPlugin.css": "./lib/styles/LabelPlugin.css",
-    "./plugins/FilterPlugin.css": "./lib/styles/FilterPlugin.css",
-    "./plugins/MagnifierPlugin.css": "./lib/styles/MagnifierPlugin.css"
+    "./styles/core.css": "./lib/styles/core.css",
+    "./styles/FilterPlugin.css": "./lib/styles/FilterPlugin.css",
+    "./styles/LabelPlugin.css": "./lib/styles/LabelPlugin.css",
+    "./styles/MagnifierPlugin.css": "./lib/styles/MagnifierPlugin.css",
+    "./styles/SavePlugin.css": "./lib/styles/SavePlugin.css",
+    "./styles/ImageSetPlugin.css": "./lib/styles/ImageSetPlugin.css",
+    "./styles/FullscreenPlugin.css": "./lib/styles/FullscreenPlugin.css",
+    "./styles/ImagePanPlugin.css": "./lib/styles/ImagePanPlugin.css"
   },
   "scripts": {
     "dev": "vite",
