@@ -1,14 +1,16 @@
 # ✨ Comparison Slider TS
 
-[![NPM Version](https://img.shields.io/npm/v/@alekstar79/comparison-slider.svg?style=flat)](https://www.npmjs.com/package/@alekstar79/comparison-slider)
+[![NPM Version](https://img.shields.io/npm/v/comparison-slider.svg)](https://www.npmjs.com/package/@alekstar79/comparison-slider)
 [![License](https://img.shields.io/npm/l/@alekstar79/comparison-slider.svg?style=flat)](https://github.com/alekstar79/comparison-slider/blob/main/LICENSE)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/alekstar79/comparison-slider/main.yml?branch=main)](https://github.com/alekstar79/comparison-slider/actions)
-[![TypeScript](https://img.shields.io/badge/written%20in-TypeScript-blue.svg)](https://www.typescriptlang.org/)
+[![GitHub](https://img.shields.io/badge/github-repo-green.svg?style=flat)](https://github.com/alekstar79/comparison-slider)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?style=flat-square)](https://www.typescriptlang.org)
 [![Coverage](https://img.shields.io/badge/coverage-97.76%25-brightgreen.svg)](https://github.com/alekstar79/comparison-slider)
 
 **Comparison Slider TS** is a powerful, modern, and highly customizable TypeScript library that seamlessly combines the functionality of an image comparison slider with a feature-rich image gallery. Built with TypeScript and a flexible plugin architecture, it's designed for performance, extensibility, and a superior user experience.
 
 This is not just another before-and-after slider. It's a comprehensive toolkit for interactive image presentation, allowing you to compare, filter, magnify, and navigate through image sets with smooth, hardware-accelerated effects.
+
+![banner](banner.svg)
 
 **[View Live Demo](https://alekstar79.github.io/comparison-slider)**
 
