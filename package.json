@@ -24,19 +24,20 @@
     "library"
   ],
   "files": [
-    "dist",
+    "lib",
     "README.md",
     "LICENSE"
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
   "exports": {
     ".": {
       "types": "./lib/index.d.ts",
-      "import": "./lib/index.js",
-      "default": "./lib/index.js"
+      "import": "./lib/index.js"
     },
     "./plugins/*": {
-      "types": "./lib/index.d.ts",
+      "types": "./lib/plugins/*.d.ts",
       "import": "./lib/plugins/*.js"
     },
     "./styles/*": {

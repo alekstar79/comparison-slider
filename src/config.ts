@@ -1,5 +1,3 @@
-// import { EventEmitter } from './core/EventEmitter'
-
 export interface Plugin {
   initialize(): void;
   destroy?: () => void;
@@ -33,7 +31,6 @@ export interface UIBlock {
 
 export interface UIConfig {
   comparison: boolean;
-  // plugins: { new (slider: any, config: UIConfig, events: EventEmitter): Plugin }[];
   uiBlocks: UIBlock[];
   hoverToSlide?: boolean;
   imageSet?: {
