@@ -16,6 +16,13 @@
   "bugs": {
     "url": "https://github.com/alekstar79/comparison-slider/issues"
   },
+  "keywords": [
+    "typescript",
+    "images",
+    "comparison",
+    "slider",
+    "library"
+  ],
   "files": [
     "dist",
     "README.md",
