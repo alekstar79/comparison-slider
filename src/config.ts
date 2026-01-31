@@ -1,5 +1,5 @@
 import { EventEmitter } from './core/EventEmitter'
-import { FilterPlugin } from './plugins/FilterPlugin'
+// import { FilterPlugin } from './plugins/FilterPlugin'
 
 export interface Plugin {
   initialize(): void;
@@ -64,7 +64,7 @@ export interface UIConfig {
 
 export const defaultConfig: UIConfig = {
   comparison: true,
-  plugins: [FilterPlugin],
+  plugins: [],
   uiBlocks: [
     {
       id: 'filterPanel',

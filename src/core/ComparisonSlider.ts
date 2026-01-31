@@ -95,7 +95,7 @@ export class ComparisonSlider {
     return newConfig
   }
 
-  public addPlugin(plugin: Plugin) {
+  public use(plugin: Plugin) {
     this.plugins.push(plugin)
   }
 

@@ -1,12 +1,12 @@
 import type { UIConfig } from '../config'
 import { FILTERS } from '@/filters'
 
-import { FilterPlugin } from '../plugins/FilterPlugin'
-import { FullscreenPlugin } from '../plugins/FullscreenPlugin'
-import { LabelPlugin } from '../plugins/LabelPlugin'
-import { LoadImagePlugin } from '../plugins/LoadImagePlugin'
-import { MagnifierPlugin } from '../plugins/MagnifierPlugin'
-import { SavePlugin } from '../plugins/SavePlugin'
+// import { FilterPlugin } from '../plugins/FilterPlugin'
+// import { FullscreenPlugin } from '../plugins/FullscreenPlugin'
+// import { LabelPlugin } from '../plugins/LabelPlugin'
+// import { LoadImagePlugin } from '../plugins/LoadImagePlugin'
+// import { MagnifierPlugin } from '../plugins/MagnifierPlugin'
+// import { SavePlugin } from '../plugins/SavePlugin'
 
 export class SliderHtmlBuilder {
   static enhanceImage(img: HTMLImageElement, config: UIConfig): HTMLElement {
