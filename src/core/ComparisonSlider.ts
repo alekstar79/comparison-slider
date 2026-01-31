@@ -44,7 +44,6 @@ export class ComparisonSlider {
     this.originalImage = img
     this.config = this.buildConfig(config)
     this.isComparisonView = this.config.comparison
-    this.init().catch(console.error)
   }
 
   private buildConfig(baseConfig: UIConfig): UIConfig {
@@ -99,23 +98,7 @@ export class ComparisonSlider {
     this.plugins.push(plugin)
   }
 
-  public async updateImage(newImage: HTMLImageElement | string, reset = true) {
-    if (typeof newImage === 'string') {
-      this.originalImage.src = newImage
-      await this.ensureImageLoaded()
-    } else {
-      this.originalImage = newImage
-    }
-
-    this.filterEngine.updateImage(this.originalImage)
-    if (reset && this.isComparisonView && this.dragController) {
-      this.setInitialHandlePosition()
-    }
-
-    this.events.emit('imageUpdate', { image: this.originalImage })
-  }
-
-  private async init() {
+  public async mount() {
     const imgSetAttr = this.originalImage.dataset.imgset
 
     if (imgSetAttr && imgSetAttr.length > 0) {
@@ -127,7 +110,7 @@ export class ComparisonSlider {
 
     await this.ensureImageLoaded()
 
-    this.container = SliderHtmlBuilder.enhanceImage(this.originalImage, this.config)
+    this.container = SliderHtmlBuilder.enhanceImage(this.originalImage, this)
 
     const covered = this.container.querySelector('.covered')! as HTMLElement
     const originalCanvas = covered.querySelector('.original-canvas')! as HTMLCanvasElement
@@ -168,6 +151,22 @@ export class ComparisonSlider {
 
     this.plugins.forEach(plugin => plugin.initialize())
     this.setupResizeObserver()
+  }
+
+  public async updateImage(newImage: HTMLImageElement | string, reset = true) {
+    if (typeof newImage === 'string') {
+      this.originalImage.src = newImage
+      await this.ensureImageLoaded()
+    } else {
+      this.originalImage = newImage
+    }
+
+    this.filterEngine.updateImage(this.originalImage)
+    if (reset && this.isComparisonView && this.dragController) {
+      this.setInitialHandlePosition()
+    }
+
+    this.events.emit('imageUpdate', { image: this.originalImage })
   }
 
   public toggleComparisonView() {
@@ -220,10 +219,8 @@ export class ComparisonSlider {
 
   private setInitialHandlePosition() {
     const covered = this.container.querySelector('.covered')! as HTMLElement
-    const initX = parseInt(covered.dataset.initX || '0', 10)
-    const initY = parseInt(covered.dataset.initY || '0', 10)
-
-    // Convert initial pixel values from data attributes to normalized coordinates
+    const initX = parseInt(covered.dataset.initX || '250', 10)
+    const initY = parseInt(covered.dataset.initY || '300', 10)
     const normX = initX / this.originalImage.naturalWidth
     const normY = initY / this.originalImage.naturalHeight
 

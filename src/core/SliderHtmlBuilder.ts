@@ -1,19 +1,20 @@
-import type { UIConfig } from '../config'
+import { FilterPlugin } from '@/plugins/FilterPlugin'
+import { FullscreenPlugin } from '@/plugins/FullscreenPlugin'
+import { LabelPlugin } from '@/plugins/LabelPlugin'
+import { LoadImagePlugin } from '@/plugins/LoadImagePlugin'
+import { MagnifierPlugin } from '@/plugins/MagnifierPlugin'
+import { SavePlugin } from '@/plugins/SavePlugin'
+
+import type { ComparisonSlider } from './ComparisonSlider'
 import { FILTERS } from '@/filters'
 
-// import { FilterPlugin } from '../plugins/FilterPlugin'
-// import { FullscreenPlugin } from '../plugins/FullscreenPlugin'
-// import { LabelPlugin } from '../plugins/LabelPlugin'
-// import { LoadImagePlugin } from '../plugins/LoadImagePlugin'
-// import { MagnifierPlugin } from '../plugins/MagnifierPlugin'
-// import { SavePlugin } from '../plugins/SavePlugin'
-
 export class SliderHtmlBuilder {
-  static enhanceImage(img: HTMLImageElement, config: UIConfig): HTMLElement {
+  static enhanceImage(img: HTMLImageElement, slider: ComparisonSlider): HTMLElement {
     const container = document.createElement('div')
     const direction = (img.dataset.direction as 'horizontal' | 'vertical') || 'horizontal'
-    const initX = img.dataset.initX || '25'
-    const initY = img.dataset.initY || '25'
+    const initX = img.dataset.initX || '250'
+    const initY = img.dataset.initY || '300'
+    const config = slider.config
 
     const coveredContent = `<div
       class="covered"
@@ -26,16 +27,15 @@ export class SliderHtmlBuilder {
       <div class="handle-line"></div>
     </div>`
 
-    const activePluginSet = new Set(config.plugins.map(p => p.name))
+    const hasPlugin = (pluginClass: any) => slider.plugins.some(p => p instanceof pluginClass)
 
     let uiElementsHtml = ''
-    // Filter out navButtons, as they are handled by ImageSetPlugin itself
     config.uiBlocks
       .filter(block => block.id !== 'navButtons')
       .forEach(block => {
         let buttonsHtml = ''
         if (block.id === 'filterPanel') {
-          if (!activePluginSet.has(FilterPlugin.name)) return
+          if (!hasPlugin(FilterPlugin)) return
 
           const filterNamesStr = img.dataset.filters || 'Grayscale,Blur,Invert,Bright'
           const filterNames = filterNamesStr.split(',').map(name => name.trim())
@@ -63,11 +63,11 @@ export class SliderHtmlBuilder {
         } else {
           const filteredButtons = block.buttons.filter(button => {
             if (button.id === 'comparisonButton') return config.comparison
-            if (button.id === 'fullscreenButton') return activePluginSet.has(FullscreenPlugin.name)
-            if (button.id === 'magnifierButton') return activePluginSet.has(MagnifierPlugin.name)
-            if (button.id === 'saveButton') return activePluginSet.has(SavePlugin.name)
-            if (button.id === 'toggleButton') return activePluginSet.has(FilterPlugin.name)
-            if (button.id === 'uploadButton') return activePluginSet.has(LoadImagePlugin.name)
+            if (button.id === 'fullscreenButton') return hasPlugin(FullscreenPlugin)
+            if (button.id === 'magnifierButton') return hasPlugin(MagnifierPlugin)
+            if (button.id === 'saveButton') return hasPlugin(SavePlugin)
+            if (button.id === 'toggleButton') return hasPlugin(FilterPlugin)
+            if (button.id === 'uploadButton') return hasPlugin(LoadImagePlugin)
             return true
           })
 
@@ -83,7 +83,7 @@ export class SliderHtmlBuilder {
         }
       })
 
-    const labelsHtml = activePluginSet.has(LabelPlugin.name)
+    const labelsHtml = hasPlugin(LabelPlugin)
       ? `<div class="comparison-label label-after"></div><div class="comparison-label label-before"></div>`
       : ''
 
