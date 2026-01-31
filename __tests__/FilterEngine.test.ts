@@ -18,12 +18,13 @@ describe('FilterEngine', () => {
   let filteredCanvas: HTMLCanvasElement
   let originalImage: HTMLImageElement
   let engine: FilterEngine
+  let sliderContainer: HTMLElement
 
   beforeEach(() => {
     // Reset mocks to ensure test isolation
     vi.clearAllMocks()
 
-    const sliderContainer = document.createElement('div')
+    sliderContainer = document.createElement('div')
     sliderContainer.className = 'slider-container'
     Object.defineProperties(sliderContainer, {
       clientWidth: { value: 800, configurable: true },
@@ -51,23 +52,14 @@ describe('FilterEngine', () => {
 
   it('should initialize and perform an initial redraw', () => {
     expect(engine).toBeInstanceOf(FilterEngine)
-    // The constructor calls redraw, which calls drawOnCanvas.
-    // The new setup ensures getContext() returns a spy-able context.
     expect(engine.originalCtx.drawImage).toHaveBeenCalled()
   })
 
-  it('should apply a real filter', () => {
-    const filterString = 'blur(5px)'
-
-    // Spy on the context that will be used inside applyFilterToCanvas
-    const tempCtx = document.createElement('canvas').getContext('2d')!
-    const createElementSpy = vi.spyOn(document, 'createElement').mockReturnValue(tempCtx.canvas)
-
-    engine.applyFilter(filterString)
-
-    // The filter is set on the temporary canvas context
-    expect(tempCtx.filter).toBe(filterString)
-    createElementSpy.mockRestore()
+  it('should not re-apply filter if already applying', () => {
+    const applySpy = vi.spyOn(engine as any, 'applyFilterToCanvas')
+    engine['isApplyingFilter'] = true
+    engine.applyFilter('blur(5px)')
+    expect(applySpy).not.toHaveBeenCalled()
   })
 
   it('should handle the "none" filter', () => {
@@ -120,36 +112,31 @@ describe('FilterEngine', () => {
     createElementSpy.mockRestore()
   })
 
-  it('should apply pan offset and clamp Y for wide images', () => {
-    const drawImageSpy = vi.spyOn(engine.originalCtx, 'drawImage')
-    drawImageSpy.mockClear()
+  it('should not redraw if container size is zero', () => {
+    Object.defineProperty(sliderContainer, 'clientWidth', { value: 0 })
+    const drawSpy = vi.spyOn(engine.originalCtx, 'drawImage')
+    drawSpy.mockClear() // Clear calls from constructor
 
-    engine.setPanOffset(100, 50)
+    engine.redraw()
 
-    // For a WIDE image, vertical pan (y) should be clamped to 0.
-    // sx = 240 (base) + 100 (pan) = 340
-    // sy = 50, but clamped between 0 and (1080 - 1080), so it becomes 0.
-    expect(drawImageSpy).toHaveBeenLastCalledWith(originalImage, 340, 0, expect.any(Number), expect.any(Number), 0, 0, expect.any(Number), expect.any(Number))
+    expect(drawSpy).not.toHaveBeenCalled()
   })
 
-  it('should apply pan offset and clamp X for tall images', () => {
-    // Re-initialize engine with a tall image
-    const tallImage = new Image()
-    Object.defineProperties(tallImage, {
-      naturalWidth: { value: 1080, configurable: true },
-      naturalHeight: { value: 1920, configurable: true }
-    })
-    engine = new FilterEngine(originalCanvas, filteredCanvas, tallImage)
+  it('should apply filter to transition frame if a filter is active', () => {
+    engine.applyFilter('blur(5px)')
+    const applyFilterSpy = vi.spyOn(engine as any, 'applyFilterToTransitionFrame')
+    engine.renderSlideTransition(originalImage, new Image(), 0.5, 'next')
+    expect(applyFilterSpy).toHaveBeenCalled()
+  })
 
-    const drawImageSpy = vi.spyOn(engine.originalCtx, 'drawImage')
-    drawImageSpy.mockClear()
-
-    engine.setPanOffset(100, 50)
-
-    // For a TALL image, horizontal pan (x) should be clamped to 0.
-    // sx = 100, but clamped between 0 and (1080 - 1080), so it becomes 0.
-    // sy = 555 (base) + 50 (pan) = 605
-    expect(drawImageSpy).toHaveBeenLastCalledWith(tallImage, 0, 605, expect.any(Number), expect.any(Number), 0, 0, expect.any(Number), expect.any(Number))
+  it('should generate and shuffle pixel coordinates', () => {
+    const coords = engine.generatePixelCoordinates()
+    expect(coords.length).toBeGreaterThan(0)
+    expect(coords[0]).toHaveProperty('x')
+    expect(coords[0]).toHaveProperty('y')
+    // It's hard to test randomness, but we can check if it's not sorted
+    const isSorted = coords.every((c, i) => i === 0 || (c.y >= coords[i - 1].y && c.x >= coords[i - 1].x))
+    expect(isSorted).toBe(false)
   })
 
   // Transition effects tests

@@ -1,75 +1,74 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { SliderHtmlBuilder } from '../src/core/SliderHtmlBuilder'
-import { type ComparisonSlider, FilterPlugin, FullscreenPlugin, LabelPlugin, defaultConfig } from '../src'
+import { type ComparisonSlider, defaultConfig, FilterPlugin } from '../src'
 
 describe('SliderHtmlBuilder', () => {
   let img: HTMLImageElement
   let sliderMock: Partial<ComparisonSlider>
 
   beforeEach(() => {
-    document.body.innerHTML = '<div id="wrapper"></div>'
-    const wrapper = document.getElementById('wrapper')!
-    img = document.createElement('img')
-    img.className = 'my-slider'
-    wrapper.appendChild(img)
+    document.body.innerHTML = '<div id="parent"><img id="test-img" class="my-class" data-direction="vertical" /></div>'
+    img = document.getElementById('test-img') as HTMLImageElement
+    Object.defineProperties(img, {
+      naturalWidth: { value: 800, configurable: true },
+      naturalHeight: { value: 600, configurable: true }
+    })
 
     sliderMock = {
       config: JSON.parse(JSON.stringify(defaultConfig)),
-      plugins: []
+      plugins: [new FilterPlugin({} as ComparisonSlider, defaultConfig, {} as any)]
     }
   })
 
-  it('should create the basic slider structure', () => {
+  it('should create a container and replace the original image', () => {
+    const parent = img.parentNode
     const container = SliderHtmlBuilder.enhanceImage(img, sliderMock as ComparisonSlider)
-    expect(container.querySelector('.covered')).not.toBeNull()
-    expect(container.querySelector('.original-canvas')).not.toBeNull()
-    expect(container.querySelector('.handle-grip')).not.toBeNull()
-    expect(container.classList.contains('my-slider')).toBe(true)
+
+    expect(container.classList.contains('slider-container')).toBe(true)
+    expect(parent?.contains(img)).toBe(false)
+    expect(parent?.contains(container)).toBe(true)
   })
 
-  it('should create fullscreen button only if FullscreenPlugin is used', () => {
-    let container = SliderHtmlBuilder.enhanceImage(img, sliderMock as ComparisonSlider)
-    expect(container.querySelector('#fullscreenButton')).toBeNull()
-
-    sliderMock.plugins = [new FullscreenPlugin({} as any, {} as any, {} as any)]
-    document.getElementById('wrapper')!.innerHTML = ''
-    document.getElementById('wrapper')!.appendChild(img)
-    container = SliderHtmlBuilder.enhanceImage(img, sliderMock as ComparisonSlider)
-    expect(container.querySelector('#fullscreenButton')).not.toBeNull()
+  it('should copy classes from the original image', () => {
+    const container = SliderHtmlBuilder.enhanceImage(img, sliderMock as ComparisonSlider)
+    expect(container.classList.contains('my-class')).toBe(true)
   })
 
-  it('should create filter panel only if FilterPlugin is used', () => {
-    sliderMock.plugins = [new FilterPlugin({} as any, {} as any, {} as any)]
+  it('should set aspect-ratio based on image dimensions', () => {
     const container = SliderHtmlBuilder.enhanceImage(img, sliderMock as ComparisonSlider)
-    expect(container.querySelector('#filterPanel')).not.toBeNull()
-    expect(container.querySelectorAll('.filter-buttons button').length).toBeGreaterThan(0)
+    expect(container.style.aspectRatio).toBe('800 / 600')
   })
 
-  it('should create labels only if LabelPlugin is used', () => {
-    sliderMock.plugins = [new LabelPlugin({} as any, {} as any, {} as any)]
+  it('should create covered content with correct data attributes', () => {
     const container = SliderHtmlBuilder.enhanceImage(img, sliderMock as ComparisonSlider)
-    expect(container.querySelector('.comparison-label')).not.toBeNull()
+    const covered = container.querySelector('.covered')!
+    expect(covered).not.toBeNull()
+    expect(covered.querySelector('.original-canvas')).not.toBeNull()
+    expect(covered.querySelector('.filtered-canvas')).not.toBeNull()
+    expect((covered as HTMLElement).dataset.direction).toBe('vertical')
   })
 
-  it('should render only specified filters from data-filters attribute', () => {
-    sliderMock.plugins = [new FilterPlugin({} as any, {} as any, {} as any)]
-    img.dataset.filters = 'Sepia,Blur'
+  it('should create filter buttons based on data-filters attribute', () => {
+    img.dataset.filters = 'Grayscale,Invert'
     const container = SliderHtmlBuilder.enhanceImage(img, sliderMock as ComparisonSlider)
-    const buttons = container.querySelectorAll('.filter-buttons button')
-
-    // Check for presence and content regardless of order
-    const buttonTexts = Array.from(buttons).map(btn => btn.textContent)
-    expect(buttons.length).toBe(2)
-    expect(buttonTexts).toContain('Sepia')
-    expect(buttonTexts).toContain('Blur')
+    const filterButtons = container.querySelectorAll('.filter-buttons button')
+    expect(filterButtons.length).toBe(2)
+    expect(filterButtons[0].textContent).toBe('Grayscale')
+    expect(filterButtons[1].textContent).toBe('Invert')
   })
 
-  it('should add "Original" filter button if comparison is false', () => {
-    sliderMock.plugins = [new FilterPlugin({} as any, {} as any, {} as any)]
-    sliderMock.config!.comparison = false
+  it('should not create a ui-block if all its buttons are filtered out', () => {
+    // Mock a config where the only button requires a plugin that is not present
+    sliderMock.config!.uiBlocks = [{
+      id: 'testBlock',
+      direction: 'horizontal',
+      buttons: [{ id: 'saveButton', iconSvg: '...' }]
+    }]
+    // Ensure the SavePlugin is NOT in the plugins array
+    sliderMock.plugins = []
+
     const container = SliderHtmlBuilder.enhanceImage(img, sliderMock as ComparisonSlider)
-    const originalButton = container.querySelector('.filter-buttons button[data-filter="none"]')
-    expect(originalButton).not.toBeNull()
-    expect(originalButton?.textContent).toBe('Original')
+    const testBlock = container.querySelector('#testBlock')
+    expect(testBlock).toBeNull()
   })
 })

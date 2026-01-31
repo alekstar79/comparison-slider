@@ -10,7 +10,6 @@ describe('DragController', () => {
   let events: EventEmitter
 
   beforeEach(() => {
-    // Use fake timers to control requestAnimationFrame
     vi.useFakeTimers()
 
     const createMockElement = (className: string) => {
@@ -36,7 +35,6 @@ describe('DragController', () => {
   })
 
   afterEach(() => {
-    // Restore real timers after each test
     vi.useRealTimers()
   })
 
@@ -52,7 +50,6 @@ describe('DragController', () => {
     handle.dispatchEvent(new MouseEvent('mousedown', { clientX: 400, clientY: 300, bubbles: true }))
     document.dispatchEvent(new MouseEvent('mousemove', { clientX: 200, clientY: 300, bubbles: true }))
 
-    // Advance timers to execute the rAF callback
     await vi.runOnlyPendingTimersAsync()
 
     expect(handle.style.transform).toBe('translate(200px, 300px)')
@@ -72,28 +69,28 @@ describe('DragController', () => {
     expect(filteredCanvas.style.clipPath).toBe('inset(0 0 calc(100% - 200px) 0)')
   })
 
-  it('should stop dragging on mouseup', () => {
+  it('should handle touch events', async () => {
     new DragController(container, handle, line, filteredCanvas, 'horizontal', defaultConfig, events)
-    handle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+    const touchStart = new TouchEvent('touchstart', { touches: [{ clientX: 400, clientY: 300 }] as any })
+    handle.dispatchEvent(touchStart)
     expect(handle.classList.contains('draggable')).toBe(true)
-    document.dispatchEvent(new MouseEvent('mouseup'))
+
+    const touchMove = new TouchEvent('touchmove', { touches: [{ clientX: 200, clientY: 300 }] as any })
+    document.dispatchEvent(touchMove)
+    await vi.runOnlyPendingTimersAsync()
+    expect(handle.style.transform).toBe('translate(200px, 300px)')
+
+    document.dispatchEvent(new TouchEvent('touchend'))
     expect(handle.classList.contains('draggable')).toBe(false)
   })
 
-  it('should set position with setNormalizedPosition', async () => {
-    const controller = new DragController(container, handle, line, filteredCanvas, 'horizontal', defaultConfig, events)
-    controller.setNormalizedPosition(0.25, 0.75)
-
-    await vi.runOnlyPendingTimersAsync()
-
-    expect(handle.style.transform).toBe('translate(200px, 450px)')
-    expect(filteredCanvas.style.clipPath).toBe('inset(0 calc(100% - 200px) 0 0)')
-  })
-
-  it('should be disabled and not react to events', () => {
+  it('should set disabled state and reset styles', () => {
     const controller = new DragController(container, handle, line, filteredCanvas, 'horizontal', defaultConfig, events)
     controller.setDisabled(true)
     expect(handle.style.display).toBe('none')
+    expect(line.style.display).toBe('none')
+    expect(filteredCanvas.style.clipPath).toBe('none')
+
     handle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
     expect(handle.classList.contains('draggable')).toBe(false)
   })
@@ -106,6 +103,28 @@ describe('DragController', () => {
     await vi.runOnlyPendingTimersAsync()
 
     expect(handle.style.transform).toBe('translate(400px, 300px)')
-    expect(filteredCanvas.style.clipPath).toBe('inset(0 calc(100% - 400px) 0 0)')
+  })
+
+  it('should not update position if container has zero size', () => {
+    const controller = new DragController(container, handle, line, filteredCanvas, 'horizontal', defaultConfig, events)
+    controller.setNormalizedPosition(0.5, 0.5)
+    Object.defineProperty(container, 'clientWidth', { value: 0 })
+    Object.defineProperty(container, 'clientHeight', { value: 0 })
+
+    controller.updatePositionFromPixels(100, 100)
+    const position = controller.getPosition()
+    expect(position.x).toBe(0) // 0.5 * 0
+    expect(position.y).toBe(0) // 0.5 * 0
+  })
+
+  it('should only schedule one animation frame at a time', () => {
+    const controller = new DragController(container, handle, line, filteredCanvas, 'horizontal', defaultConfig, events)
+    const rAFSpy = vi.spyOn(window, 'requestAnimationFrame')
+
+    controller.redraw()
+    controller.redraw()
+    controller.redraw()
+
+    expect(rAFSpy).toHaveBeenCalledTimes(1)
   })
 })

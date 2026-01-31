@@ -8,6 +8,17 @@ vi.stubGlobal('ResizeObserver', vi.fn(() => ({
 })))
 
 // FIX for Pointer Events API
+if (typeof PointerEvent === 'undefined') {
+  // @ts-ignore
+  global.PointerEvent = class PointerEvent extends MouseEvent {
+    public pointerId: number
+    constructor(type: string, params: PointerEventInit = {}) {
+      super(type, params)
+      this.pointerId = params.pointerId ?? 1
+    }
+  }
+}
+
 // JSDOM doesn't implement setPointerCapture or releasePointerCapture.
 // We add empty mock functions to the Element prototype to prevent errors.
 if (!Element.prototype.setPointerCapture) {

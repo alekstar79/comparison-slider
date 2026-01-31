@@ -41,7 +41,10 @@ export class SavePlugin implements Plugin {
     tempCtx.drawImage(originalImage, 0, 0)
 
     // Generate file name
-    const originalFileName = originalImage.src.split('/').pop()?.split('.').slice(0, -1).join('.') || 'image'
+    const isDataUrl = originalImage.src.startsWith('data:')
+    const originalFileName = isDataUrl
+      ? 'image'
+      : originalImage.src.split('/').pop()?.split('.').slice(0, -1).join('.') || 'image'
     const finalFileName = `${originalFileName}-${filterName}.png`
 
     // Trigger download

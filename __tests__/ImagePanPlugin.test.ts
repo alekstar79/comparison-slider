@@ -6,101 +6,104 @@ describe('ImagePanPlugin', () => {
   let events: EventEmitter
   let config: UIConfig
   let container: HTMLElement
-  let originalImage: HTMLImageElement
-  let originalCanvas: HTMLCanvasElement
+  let plugin: ImagePanPlugin
 
   beforeEach(() => {
-    document.body.innerHTML = '<div class="slider-container"><canvas class="original-canvas"></canvas></div>'
+    document.body.innerHTML = '<div class="slider-container"></div>'
     container = document.body.querySelector('.slider-container')!
-    originalCanvas = container.querySelector('.original-canvas')!
-    originalImage = new Image()
-
     Object.defineProperties(container, {
       clientWidth: { value: 800, configurable: true },
       clientHeight: { value: 600, configurable: true }
-    })
-    Object.defineProperties(originalImage, {
-      naturalWidth: { value: 1920, configurable: true },
-      naturalHeight: { value: 1080, configurable: true }
     })
 
     events = new EventEmitter()
     config = JSON.parse(JSON.stringify(defaultConfig))
 
+    const originalImage = new Image()
+    Object.defineProperties(originalImage, {
+      naturalWidth: { value: 1920, configurable: true }, // Wide image
+      naturalHeight: { value: 1080, configurable: true }
+    })
+
     sliderMock = {
       container,
-      originalImage,
       events,
       config,
+      originalImage,
       filterEngine: {
-        setPanOffset: vi.fn(),
         panOffset: { x: 0, y: 0 },
-        originalCanvas: originalCanvas,
+        setPanOffset: vi.fn(),
+        originalCanvas: document.createElement('canvas'),
         filteredCanvas: document.createElement('canvas')
       }
     }
+
+    plugin = new ImagePanPlugin(sliderMock as ComparisonSlider, config, events)
+    plugin.initialize()
   })
 
-  it('should set cursor to "grab" if image is pannable on initialize', () => {
-    const plugin = new ImagePanPlugin(sliderMock as ComparisonSlider, config, events)
-    plugin.initialize()
+  it('should enable panning for wide images', () => {
     expect(container.style.cursor).toBe('grab')
   })
 
-  it('should not set cursor to "grab" if image is not pannable', () => {
-    // Make image and container have the same aspect ratio
-    Object.defineProperty(originalImage, 'naturalWidth', { value: 800, configurable: true })
-    Object.defineProperty(originalImage, 'naturalHeight', { value: 600, configurable: true })
-
-    const plugin = new ImagePanPlugin(sliderMock as ComparisonSlider, config, events)
-    plugin.initialize()
+  it('should not enable panning for images with similar aspect ratio', () => {
+    Object.defineProperties(sliderMock.originalImage!, {
+      naturalWidth: { value: 800, configurable: true },
+      naturalHeight: { value: 600, configurable: true }
+    })
+    // Re-check pannable state
+    plugin['checkPannable']()
     expect(container.style.cursor).toBe('')
   })
 
-  it('should start panning on pointerdown on canvas', () => {
-    const plugin = new ImagePanPlugin(sliderMock as ComparisonSlider, config, events)
-    plugin.initialize()
+  it('should start panning on pointerdown on a canvas', () => {
+    const canvas = sliderMock.filterEngine!.originalCanvas
+    const pointerDownEvent = new PointerEvent('pointerdown', { bubbles: true })
+    Object.defineProperty(pointerDownEvent, 'target', { value: canvas, configurable: true })
 
-    const pointerDownEvent = new MouseEvent('pointerdown', { bubbles: true })
-    originalCanvas.dispatchEvent(pointerDownEvent)
-
-    expect(plugin['isPanning']).toBe(true)
+    // Dispatch on the container, which is where the listener is
+    container.dispatchEvent(pointerDownEvent)
     expect(container.style.cursor).toBe('grabbing')
   })
 
-  it('should not start panning if not pannable', () => {
-    // Make image and container have the same aspect ratio
-    Object.defineProperty(originalImage, 'naturalWidth', { value: 800, configurable: true })
-    Object.defineProperty(originalImage, 'naturalHeight', { value: 600, configurable: true })
+  it('should not start panning if target is not a canvas', () => {
+    const notCanvas = document.createElement('div')
+    const pointerDownEvent = new PointerEvent('pointerdown', { bubbles: true })
+    Object.defineProperty(pointerDownEvent, 'target', { value: notCanvas, configurable: true })
 
-    const plugin = new ImagePanPlugin(sliderMock as ComparisonSlider, config, events)
-    plugin.initialize()
-
-    const pointerDownEvent = new MouseEvent('pointerdown', { bubbles: true })
-    originalCanvas.dispatchEvent(pointerDownEvent)
-
-    expect(plugin['isPanning']).toBe(false)
+    container.dispatchEvent(pointerDownEvent)
+    expect(container.style.cursor).toBe('grab') // Should not change to 'grabbing'
   })
 
-  it('should call setPanOffset on pointermove', () => {
-    const plugin = new ImagePanPlugin(sliderMock as ComparisonSlider, config, events)
-    plugin.initialize()
+  it('should update pan offset on pointermove', () => {
+    const setPanOffsetSpy = sliderMock.filterEngine!.setPanOffset
+    // Manually set isPanning to true to simulate the state after pointerdown
+    plugin['isPanning'] = true
+    plugin['startPanPosition'] = { x: 100, y: 100 }
+    plugin['startPanOffset'] = { x: 0, y: 0 }
 
-    originalCanvas.dispatchEvent(new MouseEvent('pointerdown', { clientX: 100, clientY: 100, bubbles: true }))
-    document.dispatchEvent(new MouseEvent('pointermove', { clientX: 150, clientY: 120, bubbles: true }))
+    // Move pointer
+    const pointerMoveEvent = new PointerEvent('pointermove', { clientX: 150, clientY: 120, bubbles: true })
+    document.dispatchEvent(pointerMoveEvent)
 
-    expect(sliderMock.filterEngine!.setPanOffset).toHaveBeenCalledWith(expect.closeTo(-90), expect.closeTo(-36))
+    expect(setPanOffsetSpy).toHaveBeenCalled()
+    // Check the calculation
+    // dx = 50, dy = 20
+    // scale = 600 / 1080 = 0.555...
+    // newOffsetX = 0 - (50 / scale) = -90
+    // newOffsetY = 0 - (20 / scale) = -36
+    expect(setPanOffsetSpy).toHaveBeenCalledWith(-90, -36)
   })
 
   it('should stop panning on pointerup', () => {
-    const plugin = new ImagePanPlugin(sliderMock as ComparisonSlider, config, events)
-    plugin.initialize()
+    // Set grabbing state
+    plugin['isPanning'] = true
+    plugin['panTarget'] = sliderMock.filterEngine!.originalCanvas
+    container.style.cursor = 'grabbing'
 
-    originalCanvas.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }))
-    expect(plugin['isPanning']).toBe(true)
-
-    document.dispatchEvent(new MouseEvent('pointerup'))
-    expect(plugin['isPanning']).toBe(false)
+    // Stop panning
+    const pointerUpEvent = new PointerEvent('pointerup', { pointerId: 1, bubbles: true })
+    document.dispatchEvent(pointerUpEvent)
     expect(container.style.cursor).toBe('grab')
   })
 })

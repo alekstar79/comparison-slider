@@ -22,7 +22,7 @@ export class FullscreenPlugin implements Plugin {
   private async toggleFullscreen() {
     if (!document.fullscreenElement) {
       this.slider.container.requestFullscreen().catch(err => {
-        alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`)
+        console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`)
       })
     } else {
       await document.exitFullscreen()

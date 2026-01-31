@@ -97,9 +97,10 @@ describe('FilterPlugin', () => {
     expect(sliderMock.filterEngine!.applyFilter).toHaveBeenCalledWith('none')
   })
 
-  it('should remove "Original" button when switching back to comparison view', () => {
+  it('should remove "Original" button and restore last active filter', () => {
     const plugin = new FilterPlugin(sliderMock as ComparisonSlider, config, events)
     plugin.initialize()
+    filterButton2.click() // Set a different active filter
 
     // Go to single view first
     events.emit('comparisonViewChange', { isComparisonView: false })
@@ -108,7 +109,25 @@ describe('FilterPlugin', () => {
     // Go back to comparison view
     events.emit('comparisonViewChange', { isComparisonView: true })
     expect(uiPanel.querySelector('button[data-filter="none"]')).toBeNull()
-    // It should restore the last active filter
+    // It should restore the last active filter (filterButton2)
+    expect(filterButton2.classList.contains('active')).toBe(true)
+    expect(sliderMock.filterEngine!.applyFilter).toHaveBeenCalledWith('blur(5px)')
+  })
+
+  it('should remove "Original" button and set initial filter if last active was "Original"', () => {
+    const plugin = new FilterPlugin(sliderMock as ComparisonSlider, config, events)
+    plugin.initialize()
+
+    // Go to single view and click "Original"
+    events.emit('comparisonViewChange', { isComparisonView: false })
+    const originalButton = uiPanel.querySelector('button[data-filter="none"]') as HTMLButtonElement
+    originalButton.click()
+
+    // Go back to comparison view
+    events.emit('comparisonViewChange', { isComparisonView: true })
+    expect(uiPanel.querySelector('button[data-filter="none"]')).toBeNull()
+
+    // It should fall back to the initial filter (filterButton1)
     expect(filterButton1.classList.contains('active')).toBe(true)
     expect(sliderMock.filterEngine!.applyFilter).toHaveBeenCalledWith('sepia(1)')
   })

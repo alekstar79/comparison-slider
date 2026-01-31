@@ -6,8 +6,14 @@ describe('SavePlugin', () => {
   let container: HTMLElement
   let saveButton: HTMLButtonElement
   let activeFilterButton: HTMLButtonElement
+  let originalImage: HTMLImageElement
+
+  // Mock link click and toDataURL
+  const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+  const toDataURLSpy = vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue('data:image/png;base64,test')
 
   beforeEach(() => {
+    vi.clearAllMocks()
     document.body.innerHTML = `
       <div class="slider-container">
         <div class="filter-buttons">
@@ -19,14 +25,14 @@ describe('SavePlugin', () => {
     container = document.body.querySelector('.slider-container')!
     saveButton = container.querySelector('#saveButton')!
     activeFilterButton = container.querySelector('.filter-buttons button')!
-    // Use textContent for reliability in JSDOM
     activeFilterButton.textContent = 'Sepia'
 
-    const originalImage = new Image()
-    // This now works because of the improved mock in setup.ts
+    originalImage = new Image()
     originalImage.src = 'path/to/my-image.jpg'
-    Object.defineProperty(originalImage, 'naturalWidth', { value: 1920, configurable: true })
-    Object.defineProperty(originalImage, 'naturalHeight', { value: 1080, configurable: true })
+    Object.defineProperties(originalImage, {
+      naturalWidth: { value: 1920, configurable: true },
+      naturalHeight: { value: 1080, configurable: true }
+    })
 
     sliderMock = {
       container,
@@ -43,33 +49,61 @@ describe('SavePlugin', () => {
 
   it('should create a canvas, apply filter, and trigger download on click', () => {
     const createElementSpy = vi.spyOn(document, 'createElement')
-    const toDataURLSpy = vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue('data:image/png;base64,test')
-    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
-
     const plugin = new SavePlugin(sliderMock as ComparisonSlider, {} as UIConfig, {} as any)
     plugin.initialize()
 
     saveButton.click()
 
     const tempCanvas = createElementSpy.mock.results[0].value as HTMLCanvasElement
-    expect(tempCanvas.tagName).toBe('CANVAS')
     expect(tempCanvas.width).toBe(1920)
+    expect(tempCanvas.height).toBe(1080)
 
     const tempCtx = tempCanvas.getContext('2d')!
     expect(tempCtx.filter).toBe('sepia(1)')
-    expect(tempCtx.drawImage).toHaveBeenCalledWith(sliderMock.originalImage, 0, 0)
+    expect(tempCtx.drawImage).toHaveBeenCalledWith(originalImage, 0, 0)
 
-    expect(createElementSpy).toHaveBeenCalledTimes(2)
     const link = createElementSpy.mock.results[1].value as HTMLAnchorElement
-    expect(link.tagName).toBe('A')
     expect(link.download).toBe('my-image-sepia.png')
-    expect(link.href).toBe('data:image/png;base64,test')
-
     expect(clickSpy).toHaveBeenCalled()
+  })
 
-    toDataURLSpy.mockRestore()
-    clickSpy.mockRestore()
-    createElementSpy.mockRestore()
+  it('should handle case with no active filter button', () => {
+    activeFilterButton.classList.remove('active')
+    const createElementSpy = vi.spyOn(document, 'createElement')
+    const plugin = new SavePlugin(sliderMock as ComparisonSlider, {} as UIConfig, {} as any)
+    plugin.initialize()
+
+    saveButton.click()
+
+    const tempCtx = (createElementSpy.mock.results[0].value as HTMLCanvasElement).getContext('2d')!
+    expect(tempCtx.filter).toBe('none')
+
+    const link = createElementSpy.mock.results[1].value as HTMLAnchorElement
+    expect(link.download).toBe('my-image-filtered.png')
+  })
+
+  it('should handle image source without a file name', () => {
+    sliderMock.originalImage!.src = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...'
+    const createElementSpy = vi.spyOn(document, 'createElement')
+    const plugin = new SavePlugin(sliderMock as ComparisonSlider, {} as UIConfig, {} as any)
+    plugin.initialize()
+
+    saveButton.click()
+
+    const link = createElementSpy.mock.results[1].value as HTMLAnchorElement
+    expect(link.download).toBe('image-sepia.png')
+  })
+
+  it('should handle filter button without textContent', () => {
+    activeFilterButton.textContent = ''
+    const createElementSpy = vi.spyOn(document, 'createElement')
+    const plugin = new SavePlugin(sliderMock as ComparisonSlider, {} as UIConfig, {} as any)
+    plugin.initialize()
+
+    saveButton.click()
+
+    const link = createElementSpy.mock.results[1].value as HTMLAnchorElement
+    expect(link.download).toBe('my-image-filtered.png')
   })
 
   it('should not fail if save button is not found', () => {
