@@ -28,7 +28,9 @@ export class SavePlugin implements Plugin {
 
     // Get the current filter from the active button
     const activeFilterButton = this.slider.container.querySelector('.filter-buttons button.active') as HTMLElement
+    // Use textContent for better reliability in different environments (JSDOM)
     const currentFilter = activeFilterButton ? activeFilterButton.dataset.filter : 'none'
+    const filterName = activeFilterButton ? (activeFilterButton.textContent || 'filtered').toLowerCase().replace(/\s+/g, '-') : 'filtered'
 
     // Apply the filter to the high-resolution context
     if (currentFilter && currentFilter !== 'none') {
@@ -40,7 +42,6 @@ export class SavePlugin implements Plugin {
 
     // Generate file name
     const originalFileName = originalImage.src.split('/').pop()?.split('.').slice(0, -1).join('.') || 'image'
-    const filterName = activeFilterButton ? activeFilterButton.innerText.toLowerCase().replace(/\s+/g, '-') : 'filtered'
     const finalFileName = `${originalFileName}-${filterName}.png`
 
     // Trigger download

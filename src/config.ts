@@ -43,6 +43,7 @@ export interface UIConfig {
   labels?: {
     before: string;
     after: string;
+    position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   };
   magnifier: {
     button: string;

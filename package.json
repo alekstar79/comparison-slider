@@ -53,14 +53,19 @@
     "dev": "vite",
     "build": "yarn build:lib && vite -c vite.config.ts build",
     "build:lib": "vite -c vite.lib.config.ts build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "@types/node": "^20.12.12",
+    "@vitest/coverage-v8": "^1.6.0",
     "glob": "^13.0.0",
+    "jsdom": "^24.1.0",
     "typescript": "^5.4.5",
     "vite": "^5.2.11",
-    "vite-plugin-dts": "^3.9.1"
+    "vite-plugin-dts": "^3.9.1",
+    "vitest": "^1.6.0"
   },
   "engines": {
     "node": ">=18.0.0",

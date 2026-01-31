@@ -10,6 +10,7 @@ export class ImagePanPlugin implements Plugin {
 
   private startPanPosition = { x: 0, y: 0 }
   private startPanOffset = { x: 0, y: 0 }
+  private panTarget: HTMLElement | null = null; // Store the element that is being panned
 
   private isPannable = false
   private isPanning = false
@@ -57,6 +58,7 @@ export class ImagePanPlugin implements Plugin {
     e.preventDefault()
     target.setPointerCapture(e.pointerId)
 
+    this.panTarget = target
     this.isPanning = true
     this.startPanPosition = { x: e.clientX, y: e.clientY }
     this.startPanOffset = { ...this.slider.filterEngine.panOffset }
@@ -87,11 +89,11 @@ export class ImagePanPlugin implements Plugin {
   }
 
   private onPointerUp(e: PointerEvent): void {
-    if (!this.isPanning) return
+    if (!this.isPanning || !this.panTarget) return
 
-    const target = e.target as HTMLElement
-    target.releasePointerCapture(e.pointerId)
-
+    // Use the stored target to release the pointer capture
+    this.panTarget.releasePointerCapture(e.pointerId)
+    this.panTarget = null
     this.isPanning = false
     this.slider.container.style.cursor = this.isPannable
       ? 'grab'
