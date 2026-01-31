@@ -1,5 +1,5 @@
 import { fileURLToPath, URL } from 'node:url'
-import path from 'path'
+import { resolve } from 'path'
 
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
@@ -11,6 +11,7 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
+    extensions: ['.ts']
   },
   plugins: [
     dts({
@@ -25,11 +26,12 @@ export default defineConfig({
     reportCompressedSize: false,
     copyPublicDir: false,
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
+      entry: resolve(__dirname, 'src/index.ts'),
       name: 'ComparisonSlider',
       formats: ['es']
     },
     rollupOptions: {
+      input: resolve(__dirname, 'src/index.ts'),
       output: {
         dir: 'lib',
         format: 'es',

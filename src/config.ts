@@ -1,12 +1,5 @@
 import { EventEmitter } from './core/EventEmitter'
 import { FilterPlugin } from './plugins/FilterPlugin'
-import { FullscreenPlugin } from './plugins/FullscreenPlugin'
-import { ImagePanPlugin } from './plugins/ImagePanPlugin'
-import { ImageSetPlugin } from './plugins/ImageSetPlugin'
-import { LabelPlugin } from './plugins/LabelPlugin'
-import { LoadImagePlugin } from './plugins/LoadImagePlugin'
-import { MagnifierPlugin } from './plugins/MagnifierPlugin'
-import { SavePlugin } from './plugins/SavePlugin'
 
 export interface Plugin {
   initialize(): void;
@@ -71,16 +64,7 @@ export interface UIConfig {
 
 export const defaultConfig: UIConfig = {
   comparison: true,
-  plugins: [
-    FilterPlugin,
-    FullscreenPlugin,
-    ImagePanPlugin,
-    ImageSetPlugin,
-    LoadImagePlugin,
-    MagnifierPlugin,
-    SavePlugin,
-    LabelPlugin,
-  ],
+  plugins: [FilterPlugin],
   uiBlocks: [
     {
       id: 'filterPanel',

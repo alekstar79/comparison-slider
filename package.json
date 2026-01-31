@@ -28,6 +28,7 @@
     "README.md",
     "LICENSE"
   ],
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./lib/index.d.ts",
@@ -36,7 +37,7 @@
     },
     "./plugins/*": {
       "types": "./lib/index.d.ts",
-      "import": "./lib/index.js"
+      "import": "./lib/plugins/*.js"
     },
     "./styles/*": {
       "import": "./lib/styles/*.css"

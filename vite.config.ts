@@ -7,6 +7,7 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
+    extensions: ['.ts']
   },
   build: {
     target: 'es2022'
