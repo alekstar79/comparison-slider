@@ -24,9 +24,9 @@ This is not just another before-and-after slider. It's a comprehensive toolkit f
     * [Installation](#installation)
     * [Importing Styles](#importing-styles)
     * [HTML Setup](#html-setup)
-    * [JavaScript Initialization](#javascript-initialization)
+    * [Initialization](#initialization)
   * [⚙️ Configuration](#-configuration)
-    * [Via JavaScript Object](#via-javascript-object)
+    * [Via Object](#via-object)
     * [Via `data-` Attributes](#via-data--attributes)
     * [Detailed Configuration Options](#detailed-configuration-options)
   * [🔌 Plugins API](#-plugins-api)
@@ -119,7 +119,7 @@ The slider is initialized from a standard `<img>` element. The library will repl
 >
 ```
 
-### JavaScript Initialization
+### Initialization
 
 Import the `ComparisonSlider` class, create a new instance with your image element and a configuration object, and then call `.mount()`.
 
@@ -144,7 +144,7 @@ slider.mount()
 
 You have two ways to configure the slider, which can be used together.
 
-### Via JavaScript Object
+### Via Object
 
 This is the most powerful method, giving you access to all options with full type-safety if you're using TypeScript.
 
