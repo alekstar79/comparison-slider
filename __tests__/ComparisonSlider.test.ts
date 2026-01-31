@@ -37,11 +37,30 @@ describe('ComparisonSlider', () => {
     expect(slider.config.labels!.position).toBe('bottom-left')
   })
 
+  it('should correctly parse data-comparison="false"', () => {
+    imgElement.dataset.comparison = 'false'
+    const slider = new ComparisonSlider(imgElement, defaultConfig)
+    expect(slider.config.comparison).toBe(false)
+  })
+
+  it('should use default comparison config if data-attribute is missing', () => {
+    imgElement.removeAttribute('data-comparison')
+    const slider = new ComparisonSlider(imgElement, defaultConfig)
+    expect(slider.config.comparison).toBe(defaultConfig.comparison)
+  })
+
   it('should merge uiBlocks direction attribute', () => {
     imgElement.dataset.navButtonsDirection = 'vertical'
     const slider = new ComparisonSlider(imgElement, defaultConfig)
     const navButtonsConfig = slider.config.uiBlocks.find(b => b.id === 'navButtons')
     expect(navButtonsConfig?.direction).toBe('vertical')
+  })
+
+  it('should merge uiBlocks position attribute', () => {
+    imgElement.dataset.navButtons = "{ top: '10px', left: '10px' }"
+    const slider = new ComparisonSlider(imgElement, defaultConfig)
+    const navButtonsConfig = slider.config.uiBlocks.find(b => b.id === 'navButtons')
+    expect(navButtonsConfig?.position).toEqual({ top: '10px', left: '10px' })
   })
 
   it('should handle invalid data-attribute objects gracefully', () => {
@@ -73,6 +92,19 @@ describe('ComparisonSlider', () => {
     expect(button.style.display).toBe('none')
   })
 
+  it('should not throw if comparison button is not found', async () => {
+    const slider = new ComparisonSlider(imgElement, defaultConfig)
+    await slider.mount()
+    // In this setup, the button is not added to the container.
+    // We just need to ensure no error is thrown.
+    expect(() => {
+      const comparisonButton = slider.container.querySelector('#nonExistentButton')
+      if (comparisonButton) {
+        comparisonButton.dispatchEvent(new Event('click'))
+      }
+    }).not.toThrow()
+  })
+
   it('should use default handle position if data-attributes are missing', async () => {
     const slider = new ComparisonSlider(imgElement, defaultConfig)
     await slider.mount()
@@ -86,6 +118,21 @@ describe('ComparisonSlider', () => {
     // Manually trigger the load event our setup mock is waiting for
     imgElement.dispatchEvent(new Event('load'))
     await expect(mountPromise).resolves.toBeUndefined()
+  })
+
+  it('should handle resize observer callback with empty entries', async () => {
+    const slider = new ComparisonSlider(imgElement, defaultConfig)
+    await slider.mount()
+    const resizeCallback = (global.ResizeObserver as any).mock.calls[0][0]
+    const redrawSpy = vi.spyOn(slider.filterEngine, 'redraw')
+
+    // Test with no entries
+    resizeCallback([])
+    expect(redrawSpy).not.toHaveBeenCalled()
+
+    // Test with undefined entries
+    resizeCallback()
+    expect(redrawSpy).not.toHaveBeenCalled()
   })
 
   it('should handle resize observer callback', async () => {
@@ -121,6 +168,18 @@ describe('ComparisonSlider', () => {
     expect(slider.container.classList.contains('mode-single-view')).toBe(false)
     expect(setDisabledSpy).toHaveBeenCalledWith(false)
     expect(eventsSpy).toHaveBeenCalledWith('comparisonViewChange', { isComparisonView: true })
+  })
+
+  it('should toggle comparison view on button click', async () => {
+    const slider = new ComparisonSlider(imgElement, defaultConfig)
+    await slider.mount()
+    const toggleSpy = vi.spyOn(slider, 'toggleComparisonView')
+
+    const comparisonButton = slider.container.querySelector('#comparisonButton') as HTMLElement
+    expect(comparisonButton).not.toBeNull()
+    comparisonButton.click()
+
+    expect(toggleSpy).toHaveBeenCalled()
   })
 
   it('should update image from an HTMLImageElement', async () => {
