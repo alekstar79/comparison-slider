@@ -328,9 +328,9 @@ export class MagnifierPlugin implements Plugin {
     const radius = size / 2
     const containerRect = this.slider.container.getBoundingClientRect()
     const handlePos = this.slider.dragController?.getPosition()
-    const direction = this.slider.container.classList.contains('horizontal') ? 'horizontal' : 'vertical'
-
     const elements = this.slider.container.querySelectorAll('.ui-block button, .handle-grip, .handle-line, .nav-button, .ui-panel, .filter-buttons button, .comparison-label')
+    const coveredEl = this.slider.container.querySelector('.covered') as HTMLElement
+    const direction = coveredEl.dataset.direction as 'horizontal' | 'vertical'
 
     elements.forEach(el => {
       const htmlEl = el as HTMLElement
