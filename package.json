@@ -1,7 +1,8 @@
 {
-  "name": "@alekstar79/comparison-slider-ts",
-  "private": false,
+  "name": "@alekstar79/comparison-slider",
+  "description": "A powerful, modern, and highly customizable TypeScript library that seamlessly combines an image comparison slider with a feature-rich image gallery.",
   "version": "1.0.0",
+  "private": false,
   "type": "module",
   "main": "./lib/index.js",
   "module": "./lib/index.js",
