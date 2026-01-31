@@ -1,5 +1,4 @@
-import { EventEmitter } from './core/EventEmitter'
-// import { FilterPlugin } from './plugins/FilterPlugin'
+// import { EventEmitter } from './core/EventEmitter'
 
 export interface Plugin {
   initialize(): void;
@@ -34,7 +33,7 @@ export interface UIBlock {
 
 export interface UIConfig {
   comparison: boolean;
-  plugins: { new (slider: any, config: UIConfig, events: EventEmitter): Plugin }[];
+  // plugins: { new (slider: any, config: UIConfig, events: EventEmitter): Plugin }[];
   uiBlocks: UIBlock[];
   hoverToSlide?: boolean;
   imageSet?: {
@@ -64,7 +63,6 @@ export interface UIConfig {
 
 export const defaultConfig: UIConfig = {
   comparison: true,
-  plugins: [],
   uiBlocks: [
     {
       id: 'filterPanel',

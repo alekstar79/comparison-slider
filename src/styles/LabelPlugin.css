@@ -12,7 +12,7 @@
   z-index: 5;
 }
 
-/* Positioning for Horizontal Mode */
+/* --- Positioning for Horizontal Mode --- */
 .slider-container.horizontal .label-after {
   top: 10px;
   left: 10px;
@@ -22,7 +22,7 @@
   right: 10px;
 }
 
-/* Positioning for Vertical Mode */
+/* --- Positioning for Vertical Mode --- */
 .slider-container.vertical .label-after {
   top: 10px;
   left: 10px;

@@ -50,8 +50,6 @@ export class ComparisonSlider {
     const newConfig = JSON.parse(JSON.stringify(baseConfig))
     const data = this.originalImage.dataset
 
-    newConfig.plugins = [...baseConfig.plugins]
-
     // Merge simple data-attributes
     if (data.comparison) {
       newConfig.comparison = data.comparison === 'true'
@@ -126,15 +124,7 @@ export class ComparisonSlider {
 
     this.filterEngine = new FilterEngine(originalCanvas, filteredCanvas, this.originalImage)
     if (this.config.comparison) {
-      this.dragController = new DragController(
-        covered,
-        handleGrip,
-        handleLine,
-        filteredCanvas,
-        direction,
-        this.config,
-        this.events
-      )
+      this.dragController = new DragController(covered, handleGrip, handleLine, filteredCanvas, direction, this.config, this.events)
 
       this.setInitialHandlePosition()
 

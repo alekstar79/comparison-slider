@@ -1,3 +1,9 @@
+import '@/styles/style.css'
+import '@/styles/FilterPlugin.css'
+import '@/styles/LabelPlugin.css'
+import '@/styles/MagnifierPlugin.css'
+import '@/styles/SavePlugin.css'
+
 import { FilterPlugin } from '@/plugins/FilterPlugin'
 import { FullscreenPlugin } from '@/plugins/FullscreenPlugin'
 import { ImagePanPlugin } from '@/plugins/ImagePanPlugin'
