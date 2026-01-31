@@ -10,7 +10,7 @@
 
 This is not just another before-and-after slider. It's a comprehensive toolkit for interactive image presentation, allowing you to compare, filter, magnify, and navigate through image sets with smooth, hardware-accelerated effects.
 
-**[View Live Demo](https://alekstar79.github.io/comparison-slider/)**
+**[View Live Demo](https://alekstar79.github.io/comparison-slider)**
 
 ---
 
@@ -86,17 +86,37 @@ import '@alekstar79/comparison-slider-ts/styles/MagnifierPlugin.css'
 The slider is initialized from a standard `<img>` element. The library will replace it with the full slider component.
 
 ```html
-<!-- Basic Comparison Slider -->
+<!-- Basic Usage -->
 <img id="my-slider" src="images/before.jpg" alt="Before and After" />
+
+<!-- Comparison Slider -->
+<img
+  src="./images/l1.jpg"
+  class="slider-large"
+  data-comparison-slide
+  data-action-buttons="{ top: '50%', transform: 'translateY(-50%)', left: '10px' }"
+  data-features-buttons="{ top: '50%', transform: 'translateY(-50%)', right: '10px' }"
+  data-action-buttons-direction="vertical"
+  data-features-buttons-direction="vertical"
+  data-direction="vertical"
+  data-init-x="300"
+  data-init-y="150"
+  data-filters="all"
+  alt="Before and After"
+>
 
 <!-- Image Gallery Slider -->
 <img
-  id="my-gallery"
-  src="images/image1.jpg"
-  data-imgset="images/image1.jpg,images/image2.jpg,images/image3.jpg"
-  data-image-set-transition-effect="dissolve"
+  class="slider-large"
+  data-imgset="./images/img1.jpg,./images/img2.jpg,./images/img3.jpg,./images/img4.jpg"
+  data-comparison-slide
+  data-direction="vertical"
+  data-filters="all"
+  data-init-x="200"
+  data-init-y="300"
   alt="My Awesome Gallery"
-/>
+  src=""
+>
 ```
 
 ### JavaScript Initialization
