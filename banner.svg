@@ -7,8 +7,8 @@
     <radialGradient id="bgGrad" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="#1a232a" /><stop offset="100%" stop-color="#0f171e" /></radialGradient>
 
     <!-- Local Image -->
-    <image id="img-color" href="./public/images/l1.jpg" x="0" y="0" width="1920" height="1080" preserveAspectRatio="xMidYMid slice"/>
-    <image id="img-gray" href="./public/images/l1.jpg" x="0" y="0" width="1920" height="1080" preserveAspectRatio="xMidYMid slice" filter="grayscale(100%)"/>
+    <image id="img-color" href="https://github.com/alekstar79/comparison-slider/blob/main/public/images/l1.jpg" x="0" y="0" width="1920" height="1080" preserveAspectRatio="xMidYMid slice"/>
+    <image id="img-gray" href="https://github.com/alekstar79/comparison-slider/blob/main/public/images/l1.jpg" x="0" y="0" width="1920" height="1080" preserveAspectRatio="xMidYMid slice" filter="grayscale(100%)"/>
 
     <!-- Clip Path for the animated slider -->
     <clipPath id="clip-after">
@@ -52,40 +52,45 @@
     <use href="#img-gray" />
     <g clip-path="url(#clip-after)"><use href="#img-color" /></g>
 
-    <!-- Filter Buttons -->
-    <g mask="url(#fade-mask-correct)" font-size="20" fill="#e0e0e0" text-anchor="middle">
-      <g transform="translate(0, 850)">
-        <!-- Row 1 -->
-        <g transform="translate(150, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Grayscale</text></g>
-        <g transform="translate(320, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Blur</text></g>
-        <g transform="translate(490, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Invert</text></g>
-        <g transform="translate(660, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Bright</text></g>
-        <g transform="translate(830, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Dark</text></g>
-        <g transform="translate(1000, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Contrast</text></g>
-        <g transform="translate(1170, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Poster</text></g>
-        <g transform="translate(1340, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Sepia</text></g>
-        <g transform="translate(1510, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Blue</text></g>
-      </g>
-      <g transform="translate(0, 920)">
-        <!-- Row 2 -->
-        <g transform="translate(150, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Orange</text></g>
-        <g transform="translate(320, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Saturate</text></g>
-        <g transform="translate(490, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Heavy Blur</text></g>
-        <g transform="translate(660, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Shadow</text></g>
-        <g transform="translate(830, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Glow</text></g>
-        <g transform="translate(1000, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Vintage</text></g>
-        <g transform="translate(1170, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Cold</text></g>
-        <g transform="translate(1340, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Warm</text></g>
-      </g>
-      <g transform="translate(0, 990)">
-        <!-- Row 3 -->
-        <g transform="translate(150, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Duotone</text></g>
-        <g transform="translate(320, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Neon</text></g>
-        <g transform="translate(490, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Matrix</text></g>
-        <g transform="translate(660, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Noir</text></g>
-        <g transform="translate(830, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Lomo</text></g>
-        <g transform="translate(1000, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Pop Art</text></g>
-        <g transform="translate(1170, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Old Photo</text></g>
+    <!-- Filter Panel (Simplified and Corrected) -->
+    <g mask="url(#fade-mask-correct)">
+      <!-- Panel Background -->
+      <rect x="0" y="600" width="1920" height="480" fill="rgba(26, 35, 42, 0.7)" />
+      <!-- Panel Content -->
+      <g font-size="20" fill="#e0e0e0" text-anchor="middle">
+        <g transform="translate(0, 680)">
+          <!-- Row 1 -->
+          <g transform="translate(150, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Grayscale</text></g>
+          <g transform="translate(320, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Blur</text></g>
+          <g transform="translate(490, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Invert</text></g>
+          <g transform="translate(660, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Bright</text></g>
+          <g transform="translate(830, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Dark</text></g>
+          <g transform="translate(1000, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Contrast</text></g>
+          <g transform="translate(1170, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Poster</text></g>
+          <g transform="translate(1340, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Sepia</text></g>
+          <g transform="translate(1510, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Blue</text></g>
+        </g>
+        <g transform="translate(0, 750)">
+          <!-- Row 2 -->
+          <g transform="translate(150, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Orange</text></g>
+          <g transform="translate(320, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Saturate</text></g>
+          <g transform="translate(490, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Heavy Blur</text></g>
+          <g transform="translate(660, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Shadow</text></g>
+          <g transform="translate(830, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Glow</text></g>
+          <g transform="translate(1000, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Vintage</text></g>
+          <g transform="translate(1170, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Cold</text></g>
+          <g transform="translate(1340, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Warm</text></g>
+        </g>
+        <g transform="translate(0, 820)">
+          <!-- Row 3 -->
+          <g transform="translate(150, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Duotone</text></g>
+          <g transform="translate(320, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Neon</text></g>
+          <g transform="translate(490, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Matrix</text></g>
+          <g transform="translate(660, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Noir</text></g>
+          <g transform="translate(830, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Lomo</text></g>
+          <g transform="translate(1000, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Pop Art</text></g>
+          <g transform="translate(1170, 0)"><rect x="-70" y="-20" width="140" height="40" rx="8" fill="rgba(28, 40, 51, 0.7)" stroke="rgba(255,255,255,0.3)"/><text dominant-baseline="middle">Old Photo</text></g>
+        </g>
       </g>
     </g>
 
