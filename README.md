@@ -1,7 +1,7 @@
 # ✨ Comparison Slider TS
 
 [![NPM Version](https://img.shields.io/npm/v/comparison-slider.svg)](https://www.npmjs.com/package/@alekstar79/comparison-slider)
-[![License](https://img.shields.io/npm/l/@alekstar79/comparison-slider.svg?style=flat)](https://github.com/alekstar79/comparison-slider/blob/main/LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 [![GitHub](https://img.shields.io/badge/github-repo-green.svg?style=flat)](https://github.com/alekstar79/comparison-slider)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?style=flat-square)](https://www.typescriptlang.org)
 [![Coverage](https://img.shields.io/badge/coverage-97.76%25-brightgreen.svg)](https://github.com/alekstar79/comparison-slider)
