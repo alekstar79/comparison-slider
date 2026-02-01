@@ -10,6 +10,8 @@
 
 This is not just another before-and-after slider. It's a comprehensive toolkit for interactive image presentation, allowing you to compare, filter, magnify, and navigate through image sets with smooth, hardware-accelerated effects.
 
+![slider](slider.svg)
+
 **[View Live Demo](https://alekstar79.github.io/comparison-slider)**
 
 ---
